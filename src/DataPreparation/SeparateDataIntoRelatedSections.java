@@ -16,9 +16,9 @@ import java.util.Scanner;
  */
 public class SeparateDataIntoRelatedSections {
     
-    public static ArrayList<String> readFile(int begin, int end) throws FileNotFoundException
+    public static ArrayList<Headers> readFile(int begin, int end) throws FileNotFoundException
     {
-        ArrayList<String> namesForSelectHeaders = new ArrayList<>();
+        ArrayList<Headers> namesForSelectHeaders = new ArrayList<>();
         String[] tempArray;
         Scanner scanner = new Scanner(new File("C:\\A11.csv"));
         scanner.useDelimiter("\n");
@@ -37,7 +37,8 @@ public class SeparateDataIntoRelatedSections {
            {
                if(i>begin && i<end)
                {
-                   namesForSelectHeaders.add(tempArray[i]);
+                   Headers h = new Headers(tempArray[i], i);
+                   namesForSelectHeaders.add(h);
                } 
            }
            // namesForSelectHeaders.add(removeSignsFromName(scanner.next()));

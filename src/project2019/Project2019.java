@@ -5,49 +5,58 @@
  */
 package project2019;
 
+import DataPreparation.DataPreparationToNetwork;
+import DataPreparation.Headers;
 import DataPreparation.SeparateDataIntoRelatedSections;
 import GUI.Design;
 import GUI.UserSettingsWindow;
+import NetworkComponents.Edge;
+import NetworkComponents.Vertex;
 import UserSettings.UserSettings;
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.util.Pair;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.Slider;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
 
 /**
@@ -56,14 +65,118 @@ import javafx.stage.Stage;
  */
 public class Project2019 extends Application {
     
+     private Graph<Vertex, Edge> network;
      Canvas canvas1 = new Canvas(Design.canvasWidth, Design.canvasHeight);
      Stage copyOfPrimaryStage;
+     ObservableList<SelectedAtributes> data = FXCollections.observableArrayList();
+     List<File> files = new ArrayList();
+     
+     ArrayList<Headers> allHeaders;
+     List<Headers> selectedHeaders = new ArrayList();
+     
+     
+     List<String> selectedAttributes = new ArrayList<>();
+     private final TableView<SelectedAtributes> table = new TableView<>();
+
      //filters
      Boolean filterByYear = false;
      Boolean filterBySex = false;
      Boolean filterByGrade = false;
      Boolean filterByRegion = false;
      Boolean filterBySchool = false;
+     
+     
+     
+     private void drawEdge(GraphicsContext gc, double fromX, double fromY, double toX, double toY, double edgeWidth, Color color) {
+        gc.setLineWidth(edgeWidth);
+        gc.setStroke(color);
+        gc.strokeLine(fromX, fromY, toX, toY);
+    }
+
+    private void drawVertex(GraphicsContext gc, double positionX, double positionY, double size, Color color) {
+        double leftX = positionX - size / 2;
+        double leftY = positionY - size / 2;
+        double sizeLine = size * 0.05;
+        gc.setFill(color);
+        gc.fillOval(leftX, leftY, size, size);
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(sizeLine);
+        gc.strokeOval(leftX, leftY, size, size);
+    }
+
+    public void drawVertex(GraphicsContext gc, Vertex v, Color color) {
+        drawVertex(gc, v.getPositionX(), v.getPositionY(), v.getSize(), color);
+    }int variableToDelete =0;
+     
+     
+      private TableView createTable(TableView table, int id) {
+
+        table.setMaxHeight(Design.maxTableHeight);
+        table.setMinWidth(Design.minTableWidth);
+
+        TableColumn lastNameCol = new TableColumn("Selected attributes");
+        lastNameCol.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        
+        
+        TableColumn<SelectedAtributes, SelectedAtributes> unfriendCol = new TableColumn<>("Delete file");
+        unfriendCol.setCellValueFactory(
+                param -> new ReadOnlyObjectWrapper<>(param.getValue())
+        );
+        unfriendCol.setCellFactory(param -> new TableCell<SelectedAtributes, SelectedAtributes>() {
+            private final Button deleteButton = new Button("Remove");
+            
+
+            @Override
+            protected void updateItem(SelectedAtributes person, boolean empty) {
+                super.updateItem(person, empty);
+
+                if (person == null) {
+                    setGraphic(null);
+                    return;
+                }
+
+                setGraphic(deleteButton);
+
+                deleteButton.setOnAction((event) -> {
+
+                    String fileToDelete = person.firstName.getValue();
+
+                    getTableView().getItems().remove(person);
+                    if (id == 1) {
+                        //TODO Delete from data and files
+
+                        data.remove(person);
+
+                        Iterator<File> iter = files.iterator();
+
+                        while (iter.hasNext()) {
+                            File str = iter.next();
+
+                            if (str.getName().equals(person.firstName.getValue())) {
+                                iter.remove();
+                            }
+                        }
+
+                    } else {
+
+                    }
+                });
+            }
+        });
+
+        if (id == 1) {
+            table.setItems(data);
+        } else {
+            // table.setItems(data2);
+        }
+
+        table.getColumns().addAll(lastNameCol, unfriendCol);
+
+        lastNameCol.setMinWidth(Design.minTableColumnWidth);
+        unfriendCol.setMinWidth(Design.minTableColumnWidth);
+
+        return table;
+    }
      
      private MenuBar createMainMenu() {
         MenuBar mainMenu = new MenuBar();
@@ -190,6 +303,7 @@ public class Project2019 extends Application {
     
      public HBox createInterestsFieldsHBox(String label, int readFromIndex, int readToIndex) throws FileNotFoundException
      {
+       
         final HBox HBOXChoices = new HBox();
         Text selectProperty = new Text(label); 
         HBOXChoices.setMinWidth(Design.minTableWidth);
@@ -197,14 +311,34 @@ public class Project2019 extends Application {
          //Choice box for location 
         ChoiceBox locationchoiceBox = new ChoiceBox(); 
         
-        ArrayList<String> ar = SeparateDataIntoRelatedSections.readFile(readFromIndex,readToIndex);
-        for(String s : ar)
+        allHeaders = SeparateDataIntoRelatedSections.readFile(readFromIndex,readToIndex); //todo nefunguje ked mam viac selectboxov
+        for(Headers s : allHeaders)
         {
-            System.out.println(s);
-            locationchoiceBox.getItems().add(s);
+            System.out.println(s.getHeaderName());
+            locationchoiceBox.getItems().add(s.getHeaderName());
         } 
+        
+        Button b = new Button("Add!");
+        b.setOnAction((event) -> {
+             SelectedAtributes myFile = new SelectedAtributes(locationchoiceBox.getSelectionModel().getSelectedItem().toString());
+                    data.add(myFile);
+            System.out.println();
+            //System.out.println("Added "+locationchoiceBox.getSelectionModel().getSelectedItem().toString());
+            
+            selectedAttributes.add(locationchoiceBox.getSelectionModel().getSelectedItem().toString());
+            System.out.println();
+            for(Headers actualHeader : allHeaders)
+            {
+                System.out.println("Porovnavam "+actualHeader.getHeaderName() +" s "+locationchoiceBox.getSelectionModel().getSelectedItem().toString());
+                if(locationchoiceBox.getSelectionModel().getSelectedItem().toString() == actualHeader.getHeaderName())
+                {
+                    System.out.println("Pridal som hlavicku s menom "+actualHeader.getHeaderName()+" a id je "+actualHeader.getId());
+                    selectedHeaders.add(actualHeader);
+                }
+            }
+                });
 
-        HBOXChoices.getChildren().addAll(selectProperty, locationchoiceBox);
+        HBOXChoices.getChildren().addAll(selectProperty, locationchoiceBox, b);
         
         return HBOXChoices;
      }
@@ -229,16 +363,41 @@ public class Project2019 extends Application {
         
         //fieldsOfInterests
         final HBox HBOXEatingHabits = createInterestsFieldsHBox("Eating habits", 6, 20);
-        final HBox HBOXPhysicalActivities = createInterestsFieldsHBox("Physical activities", 20, 30);
+        //final HBox HBOXPhysicalActivities = createInterestsFieldsHBox("Physical activities", 20, 30);
       
       
-       
-       
+        Button buttonCreateNetwork =  new Button("Create network!");
+        buttonCreateNetwork.setOnAction((event) -> {
+            try {
+                network = DataPreparationToNetwork.readSpecificLines(network,selectedHeaders, filterByYear, filterBySex, filterByGrade, filterByRegion, filterBySchool);
+                System.out.println("Network hotova "+network.getEdgeCount()+" tolko hran, a tolko uzlov "+network.getVertexCount());
+                 GraphicsContext gc = canvas1.getGraphicsContext2D();
+                     gc.setFill(Color.WHITE);
+                     gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
+                     
+                        for (Edge e : network.getEdges()) {
+                   
+                            Pair<Vertex> p = network.getEndpoints(e);
+                            Vertex v = p.getFirst();
+                            Vertex v2 = p.getSecond();
+                            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
+                }
+                     
+                     
+                    for (Vertex v : network.getVertices()) {
+                    drawVertex(gc, v, Color.CORAL); //skontrolovat ci je spravne
+
+                }
+                
+            } catch (IOException ex) {
+                Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         //right side of screen
         final VBox vbox = new VBox();
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(30, 0, 0, Design.canvasWidth + 50)); //TODO dynamicky posledne bolo 930
-        vbox.getChildren().addAll(HBOXfilterByYear, HBOXfilterBySex,HBoxfilterByGrade, HBoxfilterByRegion, HBoxfilterBySchool, HBOXEatingHabits, HBOXPhysicalActivities);
+        vbox.getChildren().addAll(HBOXfilterByYear, HBOXfilterBySex,HBoxfilterByGrade, HBoxfilterByRegion, HBoxfilterBySchool, HBOXEatingHabits, createTable(table, 1), buttonCreateNetwork);//HBOxPhysical
         root.getChildren().addAll(vbox);
         
         //canvas
@@ -266,6 +425,25 @@ public class Project2019 extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+    }
+    
+       public static class SelectedAtributes {
+
+        private final SimpleStringProperty firstName;
+
+        private SelectedAtributes(String fileName) {
+            this.firstName = new SimpleStringProperty(fileName);
+
+        }
+
+        public String getFirstName() {
+            return firstName.get();
+        }
+
+        public void setFirstName(String fName) {
+            firstName.set(fName);
+        }
+
     }
     
 }
