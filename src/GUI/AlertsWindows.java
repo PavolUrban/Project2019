@@ -49,4 +49,13 @@ public class AlertsWindows {
         }
 
     }
+    
+    public static void displayAlert(String alertText) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error Dialog");
+        alert.setHeaderText("An error here");
+        alert.setContentText(alertText);
+
+        alert.showAndWait();
+    }
 }

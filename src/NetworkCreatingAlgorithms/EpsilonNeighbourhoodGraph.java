@@ -39,45 +39,36 @@ public class EpsilonNeighbourhoodGraph {
     
    
     
-    public Graph<Vertex, Edge> readCSV(List<ChosenRecords> lines) throws FileNotFoundException
+    public Graph<Vertex, Edge> createNetwork(List<ChosenRecords> lines) throws FileNotFoundException
     {
         System.out.println();
         System.out.println("Som v Epsilon NG");
-        
-        /*for (ChosenRecords line : lines)
-        {
            
-            System.out.println("Record "+ line.getRecordId()+" parameters are "+line.getAttributesValues());
-          
-        }*/
-        
         String[] tempArray;
         
         Map<Integer, String[]> map = new HashMap<Integer, String[]>();
         int numberOfVertices = 0;
         
         for(ChosenRecords cr : lines)
-        {
-            
+        {    
             String record = cr.getAttributesValues();
             System.out.println("jaaja "+ record);
             tempArray = record.split(",");
             map.put(numberOfVertices, tempArray);
             numberOfVertices++;
-        
         }
        
        
        
         Graph<Vertex,Edge> graph = initVertices(numberOfVertices);
-      //  System.out.println("Pocet uzlov bude "+numberOfVertices);
+     
         int edgeID=0;
         for (Map.Entry<Integer, String[]> firstObject : map.entrySet()) {
             for (Map.Entry<Integer, String[]> secondObject : map.entrySet()){
                  ArrayList<Double> values1 = new ArrayList<>();
                  ArrayList<Double> values2 = new ArrayList<>();
                 
-                 if(firstObject.getKey() != secondObject.getKey() && secondObject.getKey()>firstObject.getKey())
+                if(firstObject.getKey() != secondObject.getKey() && secondObject.getKey()>firstObject.getKey())
                 {
                     for(String singleValue : firstObject.getValue())
                     {
@@ -87,8 +78,7 @@ public class EpsilonNeighbourhoodGraph {
                     for(String singleValue : secondObject.getValue())
                     {
                         values2.add(Double.parseDouble(singleValue));
-                    }
-                   
+                    }   
                     
                     double distance = countEuclideanDistance(values1, values2);
                     if(distance< 5)
@@ -98,12 +88,8 @@ public class EpsilonNeighbourhoodGraph {
                     }
                     System.out.println("Vzdialenost medzi "+firstObject.getKey()+" "+secondObject.getKey()+" je "+countEuclideanDistance(values1, values2));
                 }
-                 
-                 
             }
-            
         }
-       
         
         return graph;
     }
