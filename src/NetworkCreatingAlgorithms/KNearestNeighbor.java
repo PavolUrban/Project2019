@@ -6,7 +6,8 @@
 package NetworkCreatingAlgorithms;
 
 import DataPreparation.ChosenRecords;
-import NetworkComponents.*;
+import NetworkComponents.Edge;
+import NetworkComponents.Vertex;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseGraph;
 import java.io.File;
@@ -21,8 +22,7 @@ import java.util.Scanner;
  *
  * @author pavol
  */
-public class EpsilonNeighbourhoodGraph {
-    
+public class KNearestNeighbor {
     private Vertex[] vertices;
 
     private Graph<Vertex, Edge> initVertices(int size) {
@@ -39,39 +39,36 @@ public class EpsilonNeighbourhoodGraph {
     
    
     
-    public Graph<Vertex, Edge> createNetwork(List<ChosenRecords> lines) throws FileNotFoundException
+    public Graph<Vertex, Edge> createKNNNetwork(List<ChosenRecords> lines) throws FileNotFoundException
     {
-        System.out.println();
-        System.out.println("Som v Epsilon NG");
-           
         String[] tempArray;
         
         Map<Integer, String[]> map = new HashMap<Integer, String[]>();
+        Map<Integer, Double> topDistances = new HashMap<Integer, Double>();
+        Map<Integer, Integer> topNeighbor = new HashMap<Integer, Integer>();
         int numberOfVertices = 0;
         
         for(ChosenRecords cr : lines)
-        {    
+        {
             String record = cr.getAttributesValues();
-            //System.out.println("jaaja "+ record);
             tempArray = record.split(",");
             map.put(numberOfVertices, tempArray);
+            topDistances.put(numberOfVertices, 88888.8);
+            topNeighbor.put(numberOfVertices, 500);
             numberOfVertices++;
         }
-       
-       
-       
+        
         Graph<Vertex,Edge> graph = initVertices(numberOfVertices);
-     
+      //  System.out.println("Pocet uzlov bude "+numberOfVertices);
         int edgeID=0;
         for (Map.Entry<Integer, String[]> firstObject : map.entrySet()) {
             for (Map.Entry<Integer, String[]> secondObject : map.entrySet()){
-                
-                  
                  ArrayList<Double> values1 = new ArrayList<>();
                  ArrayList<Double> values2 = new ArrayList<>();
                 
-                if(firstObject.getKey() != secondObject.getKey() && secondObject.getKey()>firstObject.getKey())
+                if(firstObject.getKey() != secondObject.getKey())
                 {
+                    //System.out.println("Pracujeme na uzle "+firstObject.getKey());
                     for(String singleValue : firstObject.getValue())
                     {
                         values1.add(Double.parseDouble(singleValue));
@@ -80,18 +77,33 @@ public class EpsilonNeighbourhoodGraph {
                     for(String singleValue : secondObject.getValue())
                     {
                         values2.add(Double.parseDouble(singleValue));
-                    }   
+                    }
+                   
                     
                     double distance = countEuclideanDistance(values1, values2);
-                    if(distance< 2)
+                    
+                  
+                    if(distance< topDistances.get(firstObject.getKey()))
                     {
-                        graph.addEdge(new Edge(edgeID), vertices[firstObject.getKey()], vertices[secondObject.getKey()]);
-                        edgeID++;
+                        System.out.println("Najblizsi sused je zmeneny na "+secondObject.getKey() + " vzdialeny "+ distance);
+                        int secondID = secondObject.getKey();
+                        topNeighbor.replace(firstObject.getKey(), topNeighbor.get(firstObject.getKey()), secondID);
+                        topDistances.replace(firstObject.getKey(), topDistances.get(firstObject.getKey()), distance);
                     }
-                    //System.out.println("Vzdialenost medzi "+firstObject.getKey()+" "+secondObject.getKey()+" je "+countEuclideanDistance(values1, values2));
+                    else
+                    {
+                        System.out.println("Sused nezmeneny "+ secondObject.getKey()+" zostavam na hodnote"+ topDistances.get(firstObject.getKey()));
+                    }
+                   // System.out.println("Vzdialenost medzi "+firstObject.getKey()+" "+secondObject.getKey()+" je "+countEuclideanDistance(values1, values2));
                 }
+                 
+                 
             }
+            System.out.println("****Final result*****Uzol "+firstObject.getKey()+" ma suseda "+topNeighbor.get(firstObject.getKey()));
+            graph.addEdge(new Edge(edgeID), vertices[firstObject.getKey()], vertices[topNeighbor.get(firstObject.getKey())]);
+            System.out.println();
         }
+        
         
         return graph;
     }

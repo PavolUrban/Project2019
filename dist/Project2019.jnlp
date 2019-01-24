@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="Project2019.jar" size="37440" download="eager" />
+    <jar href="Project2019.jar" size="41904" download="eager" />
     <jar href="lib\collections-generic-4.01.jar" size="531557" download="eager" />
     <jar href="lib\colt-1.2.0.jar" size="581945" download="eager" />
     <jar href="lib\commons-codec-1.10.jar" size="284184" download="eager" />

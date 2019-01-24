@@ -217,20 +217,29 @@ public class Project2019 extends Application {
 
               deleteButton.setOnAction((event) -> {
 
+                  
+                  //data.clear();
+                        //selectedHeaders.remove(header);
+                        for(Headers s : selectedHeaders)
+                        {
+                            System.out.println(s.getHeaderName() + " a ja mam vymazat "+person.getFirstName());
+                        }
+                  
+                  
                   String fileToDelete = person.firstName.getValue();
-
+                  //System.out.println("Vymazavam "+person.firstName);
                   getTableView().getItems().remove(person);
                   if (id == 1) {
                       //TODO Delete from data and files
 
                       data.remove(person);
 
-                      Iterator<File> iter = files.iterator();
+                      Iterator<Headers> iter = selectedHeaders.iterator();
 
                       while (iter.hasNext()) {
-                          File str = iter.next();
+                          Headers str = iter.next();
 
-                          if (str.getName().equals(person.firstName.getValue())) {
+                          if (str.getHeaderName().equals(person.firstName.getValue())) {
                               iter.remove();
                           }
                       }
@@ -489,7 +498,7 @@ public class Project2019 extends Application {
                 }
                 else
                 {
-                    network = DataPreparationToNetwork.readSpecificLines(network,selectedHeaders, filterByYear, filterBySex,sex, filterByGrade, filterByRegion, filterBySchool);
+                    network = DataPreparationToNetwork.readSpecificLines(network,selectedHeaders, filterByYear,year, filterBySex,sex, filterByGrade,grade, filterByRegion,region, filterBySchool, school);
                     System.out.println("Network hotova "+network.getEdgeCount()+" tolko hran, a tolko uzlov "+network.getVertexCount());
                     NetworkDrawer.drawNetwork(network, canvas1);
                 }
@@ -507,9 +516,15 @@ public class Project2019 extends Application {
         
         //canvas
         GraphicsContext gc = canvas1.getGraphicsContext2D();
-        gc.setFill(Color.CORNSILK);
-        gc.setStroke(Color.BLUE);
+        gc.setFill(Color.WHITE);
+        gc.setStroke(Color.BLACK);
         gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
+        
+        gc.strokeLine(0, 0, Design.canvasWidth, 0); // UP -> in general start x,y, end x, y
+        gc.strokeLine(0, 0, 0, Design.canvasHeight); // LEFT
+        gc.strokeLine(Design.canvasWidth,Design.canvasHeight, 0,Design.canvasHeight); // DOWN
+        gc.strokeLine(Design.canvasWidth, 0, Design.canvasWidth, Design.canvasHeight); 
+        gc.stroke();
 
         //left side of screen
         final VBox vboxCanvas = new VBox();

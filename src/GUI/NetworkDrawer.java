@@ -44,7 +44,14 @@ public class NetworkDrawer {
     {
         GraphicsContext gc = canvas1.getGraphicsContext2D();
         gc.setFill(Color.WHITE);
+        gc.setStroke(Color.BLACK);
         gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
+        
+        gc.strokeLine(0, 0, Design.canvasWidth, 0); // UP -> in general start x,y, end x, y
+        gc.strokeLine(0, 0, 0, Design.canvasHeight); // LEFT
+        gc.strokeLine(Design.canvasWidth,Design.canvasHeight, 0,Design.canvasHeight); // DOWN
+        gc.strokeLine(Design.canvasWidth, 0, Design.canvasWidth, Design.canvasHeight); 
+        gc.stroke();
 
         for (Edge e : network.getEdges()) 
         {
