@@ -7,8 +7,11 @@ package GUI;
 
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
+import UserSettings.UserSettings;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.Pair;
+import java.util.Collection;
+import java.util.List;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -36,8 +39,21 @@ public class NetworkDrawer {
         gc.strokeOval(leftX, leftY, size, size);
     }
 
-    public static void drawVertex(GraphicsContext gc, Vertex v, Color color) {
-        drawVertex(gc, v.getPositionX(), v.getPositionY(), v.getSize(), color);
+    public static void drawVertex(GraphicsContext gc, Vertex v, Color color, Boolean useExistingLayout) {
+        if(!useExistingLayout)
+            drawVertex(gc, v.getPositionX(), v.getPositionY(), v.getSize(), color);
+        else
+        {
+            Collection<Vertex> oldVertices = UserSettings.savedNetwork.getVertices();
+            for(Vertex old : oldVertices)
+            {
+                if(v.getId()== old.getId())
+                {
+                    drawVertex(gc, old.getPositionX(), old.getPositionY(), v.getSize(), color);
+                    break;
+                }
+            }
+        }
     }
     
     public static void drawNetwork(Graph<Vertex, Edge> network, Canvas canvas1)
@@ -63,8 +79,63 @@ public class NetworkDrawer {
                    
         for (Vertex v : network.getVertices()) 
         {
-            drawVertex(gc, v, Color.CORAL); //skontrolovat ci je spravne
+            drawVertex(gc, v, Color.CORAL, false); //skontrolovat ci je spravne
         }
+    }
+    
+    public static void redrawNetwork(Graph<Vertex, Edge> network, Canvas canvas1)
+    {
+        System.out.println("Teraz sa vola redraw");
+        GraphicsContext gc = canvas1.getGraphicsContext2D();
+        gc.setFill(Color.WHITE);
+        gc.setStroke(Color.BLACK);
+        gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
+        
+        gc.strokeLine(0, 0, Design.canvasWidth, 0); // UP -> in general start x,y, end x, y
+        gc.strokeLine(0, 0, 0, Design.canvasHeight); // LEFT
+        gc.strokeLine(Design.canvasWidth,Design.canvasHeight, 0,Design.canvasHeight); // DOWN
+        gc.strokeLine(Design.canvasWidth, 0, Design.canvasWidth, Design.canvasHeight); 
+        gc.stroke();
+
+        Collection<Vertex> oldVertices = UserSettings.savedNetwork.getVertices();
+        
+        System.out.println("V starej sieti bolo tolkoto hran "+UserSettings.savedNetwork.getEdgeCount()+" vs v novej "+network.getEdgeCount());
+        for (Edge e : network.getEdges()) 
+        {
+            Pair<Vertex> p = network.getEndpoints(e);
+            Vertex v = p.getFirst();
+            Vertex v2 = p.getSecond();
+            
+            //TODO - prechadzat rozumnejsie
+            for(Vertex old : oldVertices)
+            {
+                if(old.getId() == v.getId())
+                {
+                   // System.out.println("nasiel som uzol "+v.getId()+ "v starej sieti menim poziciu "+v.getPositionX()+" na poziciu "+old.getPositionX());
+                    v.setPositionX(old.getPositionX());
+                    v.setPositionY(old.getPositionY());
+                    break;
+                }
+            }
+            
+            for(Vertex old : oldVertices)
+            {
+                if(old.getId() == v2.getId())
+                {
+                    v2.setPositionX(old.getPositionX());
+                    v2.setPositionY(old.getPositionY());
+                    break;
+                }
+            }
+            
+            
+            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
+        }             
+                   
+        for (Vertex v : network.getVertices()) 
+        {
+            drawVertex(gc, v, Color.CORAL, true); //skontrolovat ci je spravne
+        }  
     }
     
 }

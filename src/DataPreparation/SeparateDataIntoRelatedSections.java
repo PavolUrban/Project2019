@@ -47,10 +47,10 @@ public class SeparateDataIntoRelatedSections {
         
         
         valuesForFilter.remove(0);
-        for(String value : valuesForFilter)
+       /* for(String value : valuesForFilter)
         {
             System.out.println("Najdena hodnota "+value);
-        }
+        }*/
         Collections.sort(valuesForFilter);
         
         return valuesForFilter;

@@ -13,6 +13,7 @@ import edu.uci.ics.jung.graph.SparseGraph;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +26,11 @@ import java.util.Scanner;
 public class KNearestNeighbor {
     private Vertex[] vertices;
 
-    private Graph<Vertex, Edge> initVertices(int size) {
+    private Graph<Vertex, Edge> initVertices(int size, List<ChosenRecords> records) {
         vertices = new Vertex[size];
         SparseGraph <Vertex, Edge> graph = new SparseGraph<>();
         for(int i = 0; i < size; i++){
-            vertices[i] = new Vertex(i);
+            vertices[i] = new Vertex(records.get(i).getRecordId());
             graph.addVertex(vertices[i]);
             
         }
@@ -39,13 +40,15 @@ public class KNearestNeighbor {
     
    
     
-    public Graph<Vertex, Edge> createKNNNetwork(List<ChosenRecords> lines) throws FileNotFoundException
+    public Graph<Vertex, Edge> createKNNNetwork(List<ChosenRecords> lines, int k) throws FileNotFoundException
     {
+        
         String[] tempArray;
         
         Map<Integer, String[]> map = new HashMap<Integer, String[]>();
-        Map<Integer, Double> topDistances = new HashMap<Integer, Double>();
         Map<Integer, Integer> topNeighbor = new HashMap<Integer, Integer>();
+        
+       
         int numberOfVertices = 0;
         
         for(ChosenRecords cr : lines)
@@ -53,15 +56,16 @@ public class KNearestNeighbor {
             String record = cr.getAttributesValues();
             tempArray = record.split(",");
             map.put(numberOfVertices, tempArray);
-            topDistances.put(numberOfVertices, 88888.8);
-            topNeighbor.put(numberOfVertices, 500);
             numberOfVertices++;
         }
         
-        Graph<Vertex,Edge> graph = initVertices(numberOfVertices);
+        Graph<Vertex,Edge> graph = initVertices(numberOfVertices, lines);
       //  System.out.println("Pocet uzlov bude "+numberOfVertices);
         int edgeID=0;
         for (Map.Entry<Integer, String[]> firstObject : map.entrySet()) {
+            List<Double> topsDistances = new ArrayList<Double>();
+            List<Integer> topNeighbours = new ArrayList<Integer>();
+            
             for (Map.Entry<Integer, String[]> secondObject : map.entrySet()){
                  ArrayList<Double> values1 = new ArrayList<>();
                  ArrayList<Double> values2 = new ArrayList<>();
@@ -82,26 +86,37 @@ public class KNearestNeighbor {
                     
                     double distance = countEuclideanDistance(values1, values2);
                     
-                  
-                    if(distance< topDistances.get(firstObject.getKey()))
-                    {
-                        System.out.println("Najblizsi sused je zmeneny na "+secondObject.getKey() + " vzdialeny "+ distance);
-                        int secondID = secondObject.getKey();
-                        topNeighbor.replace(firstObject.getKey(), topNeighbor.get(firstObject.getKey()), secondID);
-                        topDistances.replace(firstObject.getKey(), topDistances.get(firstObject.getKey()), distance);
+                    int secondID = secondObject.getKey();
+                    
+                    if(topsDistances.size()<k)
+                    {    
+                        topsDistances.add(distance);
+                        topNeighbours.add(secondID);
                     }
+                    
                     else
                     {
-                        System.out.println("Sused nezmeneny "+ secondObject.getKey()+" zostavam na hodnote"+ topDistances.get(firstObject.getKey()));
+                        if(distance < Collections.min(topsDistances))
+                        {
+                            int index = topsDistances.indexOf(Collections.min(topsDistances));
+                            topsDistances.remove(index);
+                            topNeighbours.remove(index);
+                            topsDistances.add(distance);
+                            topNeighbours.add(secondID);
+                        }
                     }
-                   // System.out.println("Vzdialenost medzi "+firstObject.getKey()+" "+secondObject.getKey()+" je "+countEuclideanDistance(values1, values2));
                 }
                  
                  
             }
-            System.out.println("****Final result*****Uzol "+firstObject.getKey()+" ma suseda "+topNeighbor.get(firstObject.getKey()));
-            graph.addEdge(new Edge(edgeID), vertices[firstObject.getKey()], vertices[topNeighbor.get(firstObject.getKey())]);
-            System.out.println();
+           
+            for(Integer neighboursIDs : topNeighbours)
+            {
+                graph.addEdge(new Edge(edgeID), vertices[firstObject.getKey()], vertices[neighboursIDs]);
+                edgeID++;
+            }
+            
+            
         }
         
         

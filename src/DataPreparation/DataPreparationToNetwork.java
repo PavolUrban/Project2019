@@ -9,6 +9,7 @@ import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
 import NetworkCreatingAlgorithms.EpsilonNeighbourhoodGraph;
 import NetworkCreatingAlgorithms.KNearestNeighbor;
+import UserSettings.ToMove;
 import edu.uci.ics.jung.graph.Graph;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public class DataPreparationToNetwork {
  
-    public static Graph<Vertex, Edge> readSpecificLines(Graph<Vertex, Edge> network, List<Headers> headers, Boolean filterYear, int year, Boolean filterSex,int sex, Boolean filterGrade, int grade, Boolean filterRegion, int region, Boolean filterSchool, int school) throws IOException
+    public static Graph<Vertex, Edge> readSpecificLines(Graph<Vertex, Edge> network,Boolean normalized,int methodOfNetworkCreation, List<Headers> headers, Boolean filterYear, int year, Boolean filterSex,int sex, Boolean filterGrade, int grade, Boolean filterRegion, int region, Boolean filterSchool, int school, double Epsilon, String emptyRecordAction) throws IOException
     {   
         File file = new File("C:\\A11.csv"); 
         List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8); 
@@ -34,14 +35,22 @@ public class DataPreparationToNetwork {
         if(filterYear == true || filterSex == true || filterRegion == true || filterGrade == true ||filterSchool == true)
         {
             //TODO remove records with no filter value in column to prevent NULLPointerException
-            network = getOnlyRelevantRows(network, headers, lines, filterYear, year, filterSex, sex, filterGrade,grade, filterRegion, region, filterSchool, school);
+            network = getOnlyRelevantRows(network,normalized, headers, lines, filterYear, year, filterSex, sex, filterGrade,grade, filterRegion, region, filterSchool, school, Epsilon, emptyRecordAction);
         }
         else
         {
-            EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
-            network = eng.createNetwork(getOnlyRelevantColumns(headers, lines));
-            /*KNearestNeighbor knn = new KNearestNeighbor();
-            network = knn.createKNNNetwork(getOnlyRelevantColumns(headers, lines));*/
+            if(methodOfNetworkCreation == 0 )
+            {
+                EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
+                System.out.println("Creating network with epsilon = "+emptyRecordAction);
+                network = eng.createNetwork(getOnlyRelevantColumns(headers, lines, emptyRecordAction),Epsilon, emptyRecordAction, normalized); 
+            }
+            else
+            {
+                KNearestNeighbor knn = new KNearestNeighbor();
+                network = knn.createKNNNetwork(getOnlyRelevantColumns(headers, lines, emptyRecordAction), (int)Epsilon);
+            }
+            
         }
         
         return network;
@@ -52,7 +61,7 @@ public class DataPreparationToNetwork {
         boolean recordMatchAllFilters = true;
         if(attribute.equalsIgnoreCase("") || attribute==null || attribute.isEmpty()) 
         {
-            System.out.println(" Warning! Empty property. Tento musi byt zmazany");
+            //System.out.println(" Warning! Empty property. Tento musi byt zmazany");
             recordMatchAllFilters = false;
         }
         else
@@ -69,7 +78,7 @@ public class DataPreparationToNetwork {
         return recordMatchAllFilters;
     }
     
-    public static Graph<Vertex, Edge> getOnlyRelevantRows(Graph<Vertex, Edge> network, List<Headers> headers, List<String> lines, Boolean filterYear, int year, Boolean filterSex,int sex, Boolean filterGrade,int grade, Boolean filterRegion,int region, Boolean filterSchool, int school) throws FileNotFoundException
+    public static Graph<Vertex, Edge> getOnlyRelevantRows(Graph<Vertex, Edge> network,Boolean normalized, List<Headers> headers, List<String> lines, Boolean filterYear, int year, Boolean filterSex,int sex, Boolean filterGrade,int grade, Boolean filterRegion,int region, Boolean filterSchool, int school, double Epsilon, String emptyRecordAction) throws FileNotFoundException
     {
         List<String> finalLines = new ArrayList<>();
    
@@ -145,16 +154,19 @@ public class DataPreparationToNetwork {
         }
         
         //filtering columns
-        List<ChosenRecords> chosenRecords = getOnlyRelevantColumns(headers, finalLines);
+        List<ChosenRecords> chosenRecords = getOnlyRelevantColumns(headers, finalLines, emptyRecordAction);
         
         EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
-        network = eng.createNetwork(chosenRecords);
+        System.out.println("Creating network with epsilon = "+Epsilon);
+        network = eng.createNetwork(chosenRecords, Epsilon, emptyRecordAction, normalized);
         
         return network;
     }
     
-    public static List<ChosenRecords> getOnlyRelevantColumns(List<Headers> headers, List<String> lines)
+    public static List<ChosenRecords> getOnlyRelevantColumns(List<Headers> headers, List<String> lines, String emptyRecordAction)
     {
+        ToMove.headers = headers;
+        
         int id = 0;
         List<ChosenRecords> chosenRecords = new ArrayList();
         
@@ -164,9 +176,11 @@ public class DataPreparationToNetwork {
             {
                 break;
             }
-            ChosenRecords cr = new ChosenRecords(id);
+           
             Boolean hasEmptyProperty = false;
             String [] array = line.split(",");
+            ChosenRecords cr = new ChosenRecords(Integer.parseInt(array[0])); //array[0] -> cislo dotaznika sluzi ako id
+           
             int counter = 0;
             for(Headers h : headers)
             {
@@ -176,10 +190,11 @@ public class DataPreparationToNetwork {
                 {
                     if(array[h.getId()].equalsIgnoreCase("") || array[h.getId()]==null || array[h.getId()].isEmpty()) 
                     {
-                        System.out.println("Empty property");
+                        //System.out.println("Empty property");
                         hasEmptyProperty = true;   
                     }
-                       
+                     
+                   
                     
                     cr.attributesValues = array[h.getId()];
                 }
@@ -197,7 +212,7 @@ public class DataPreparationToNetwork {
            
             if(!hasEmptyProperty)
             {
-               // System.out.println("Pridavam uzol s id !"+id);
+               
                 chosenRecords.add(cr);
             }
             
