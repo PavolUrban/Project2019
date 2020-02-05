@@ -3,25 +3,19 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/DistancesMethods/Distances.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/Layouts/LayoutFruchtermann.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/project2019/Project2019.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/Layouts/LayoutKK.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/DataPreparation/SeparateDataIntoRelatedSections.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/DataPreparation/Headers.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/Layouts/LayoutCircular.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/Layouts/Layout.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/DataPreparation/Exports.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/NetworkAnalysis/Closennes.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/NetworkAnalysis/Betweenness.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/GUI/SimpleNetworkProperties.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/NetworkAnalysis/AverageDegree.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/DataPreparation/ChosenRecords.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/NetworkComponents/Vertex.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/NetworkCreatingAlgorithms/KNearestNeighbor.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/Layouts/LayoutISOM.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/UserSettings/UserSettings.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/GUI/NetworkDrawer.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/NetworkAnalysis/ClusteringCoefficients.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/NetworkCreatingAlgorithms/EpsilonNeighbourhoodGraph.java</file>
+            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/DataPreparation/HeadersIndexes.java</file>
             <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/DataPreparation/DataPreparationToNetwork.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/GUI/Design.java</file>
-            <file>file:/C:/Users/pavol/OneDrive/Documents/NetBeansProjects/Project2019/src/UserSettings/ToMove.java</file>
         </group>
     </open-files>
 </project-private>

@@ -18,12 +18,12 @@ public class Distances {
   
     
     
-    public static double countKernellTrick(double value)
-    {
-        System.out.println("Kernell trick e value is "+Math.exp(-value));
-        return Math.exp(-value);
-    }
-    
+//    public static double countKernellTrick(double value)
+//    {
+//        System.out.println("Kernell trick e value is "+Math.exp(-value));
+//        return Math.exp(-value);
+//    }
+//    
     public double countEuclideanDistance( ArrayList<Double> values1,  ArrayList<Double> values2)
     {
         double sum = 0.0;

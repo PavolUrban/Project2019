@@ -11,17 +11,22 @@ import DataPreparation.Headers;
 import DataPreparation.HeadersIndexes;
 import DataPreparation.SeparateDataIntoRelatedSections;
 import GUI.AlertsWindows;
+import GUI.ChartMaker;
 import GUI.Design;
+import GUI.MyAlerts;
 import GUI.NetworkDrawer;
+import GUI.SimpleNetworkProperties;
 import GUI.UserSettingsWindow;
 import Layouts.Layout;
 import Layouts.LayoutCircular;
 import Layouts.LayoutFruchtermann;
 import Layouts.LayoutISOM;
 import Layouts.LayoutKK;
+import NetworkAnalysis.*;
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
 import UserSettings.UserSettings;
+import edu.uci.ics.jung.algorithms.shortestpath.DistanceStatistics;
 import edu.uci.ics.jung.graph.Graph;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -380,8 +385,73 @@ public class Project2019 extends Application {
 
         menuLayouts.getItems().addAll(itemCircularLayout, itemISOMLayout, itemKKLayout, itemFRLayout);
 
+        // Analysis based on charts        
+        Menu chartAnalysis =  new Menu("Grafy");
         
-        mainMenu.getMenus().addAll( menu2, menuLayouts); //menuCentralities
+        MenuItem betweeness = new MenuItem("Betweeness");
+        betweeness.setOnAction((event) -> {
+          networkAndTableState(1);
+        });
+        
+         MenuItem closeness = new MenuItem("Closeness");
+        closeness.setOnAction((event) -> {
+          networkAndTableState(2);
+        });
+        
+        MenuItem degree = new MenuItem("Stupeň uzlu");
+        degree.setOnAction((event) -> {
+          networkAndTableState(3);
+        });
+        
+        MenuItem degreeCentrality = new MenuItem("Degree centralita");
+        degreeCentrality.setOnAction((event) -> {
+          networkAndTableState(5);
+        });
+        
+        chartAnalysis.getItems().addAll(betweeness, closeness, degree, degreeCentrality);
+        
+        Menu statistics = new Menu("Analýza sítě");
+        
+        MenuItem avgDegree = new MenuItem("Průmerný stupeň uzlu");
+        avgDegree.setOnAction((event) -> {
+           SimpleNetworkProperties snp = new SimpleNetworkProperties();
+           snp.getAverageDegree(network);
+        });
+        
+        MenuItem diamter = new MenuItem("Průmer sítě");
+        diamter.setOnAction((event) -> {
+          SimpleNetworkProperties snp = new SimpleNetworkProperties();
+          snp.getDiameter(network);
+        });
+        
+        MenuItem globalClustCoeff = new MenuItem("Globální shlukovací koeficient");
+        globalClustCoeff.setOnAction((event) -> {
+          ClusteringCoefficients cc = new ClusteringCoefficients(network);
+          cc.count();
+        });
+        
+        MenuItem density = new MenuItem("Hustota sítě");
+        density.setOnAction((event) -> {
+          SimpleNetworkProperties snp = new SimpleNetworkProperties();
+          snp.getNetworkDensity(network);
+        });
+        
+        MenuItem avgCloseness = new MenuItem("Průměrná closeness centralita");
+        avgCloseness.setOnAction((event) -> {
+           Closennes c = new Closennes(network);
+            c.count();
+        });
+        
+        MenuItem avgBetween = new MenuItem("Průměrná betweeness centralita");
+        avgBetween.setOnAction((event) -> {
+          Betweenness b = new Betweenness(network);
+          b.count();
+        });
+        
+        statistics.getItems().addAll(avgDegree,diamter, globalClustCoeff,density, avgCloseness, avgBetween);
+        
+        
+        mainMenu.getMenus().addAll( menu2, menuLayouts, statistics, chartAnalysis); //menuCentralities
 
         return mainMenu;
     }
@@ -654,7 +724,7 @@ public class Project2019 extends Application {
         gridTitlePane.setExpanded(false);
         
         //related sections
-        final HBox mb =  somethin("Stravovací návyky", 6,12);
+        final HBox mb =  somethin("Stravovací návyky", 6,20);
        // final HBox toDelete =  somethin("Iné veci", 21,30);
         
         choicesNetworkMethodCreation.getSelectionModel().selectFirst();
@@ -870,6 +940,41 @@ public class Project2019 extends Application {
         slider.setMinorTickCount(0);
         slider.setShowTickMarks(true);
         slider.setShowTickLabels(true);
+    }
+    
+    
+    private void networkAndTableState(int chosenCeentrality) {
+        if (network == null) {
+                MyAlerts a = new MyAlerts();
+                a.displayAlert("There is no data chosen.\n" + "Add some files in table, please.");
+          
+        } 
+        else {
+            whichCentralityIsChosen(chosenCeentrality);
+        }
+
+    }
+    
+    
+     private void whichCentralityIsChosen(int chosenCentrality) {
+        if (chosenCentrality == 1) {
+            ChartMaker ch = new ChartMaker();
+            ch.createChart("Betweenness centrality", network, 500000);
+        } else if (chosenCentrality == 2) {
+            ChartMaker ch = new ChartMaker();
+            ch.createChart("Closeness centrality", network, 0.1);
+
+        } else if (chosenCentrality == 3) {
+            ChartMaker ch = new ChartMaker();
+            ch.createChart("Degree", network, 2);
+
+        } else if (chosenCentrality == 4) {
+            ChartMaker ch = new ChartMaker();
+            ch.createChart("Eigenvector centrality", network, 5);
+        } else if (chosenCentrality == 5) {
+            ChartMaker ch = new ChartMaker();
+            ch.createChart("Degree centrality", network, 0.1);
+        }
     }
     
     private void setSliderForKnn(Slider slider, double max, double min, int currentK)

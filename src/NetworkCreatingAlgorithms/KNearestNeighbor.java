@@ -43,6 +43,7 @@ public class KNearestNeighbor {
     public Graph<Vertex, Edge> createKNNNetwork(List<ChosenRecords> lines, int k) throws FileNotFoundException
     {
         
+        System.out.println("Pocitam KNN");
         String[] tempArray;
         
         Map<Integer, String[]> map = new HashMap<Integer, String[]>();

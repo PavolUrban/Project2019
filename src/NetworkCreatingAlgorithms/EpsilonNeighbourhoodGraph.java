@@ -33,7 +33,7 @@ public class EpsilonNeighbourhoodGraph {
         SparseGraph <Vertex, Edge> graph = new SparseGraph<>();
         for(int i = 0; i < size; i++){
             vertices[i] = new Vertex(records.get(i).getRecordId());
-            System.out.println("adding "+records.get(i).getRecordId()+" and values "+records.get(i).getAttributesValues());
+            //System.out.println("adding "+records.get(i).getRecordId()+" and values "+records.get(i).getAttributesValues());
             graph.addVertex(vertices[i]);
             
         }
@@ -43,10 +43,10 @@ public class EpsilonNeighbourhoodGraph {
     public Graph<Vertex, Edge> createNetwork(List<ChosenRecords> lines, double Epsilon, String distanceMethod, Boolean normalized) throws FileNotFoundException
     {
         double maxValue = 0.0;
-        Distances.countKernellTrick(2);
-        Distances.countKernellTrick(-2);
-        Distances.countKernellTrick(1);
-        Distances.countKernellTrick(-1);
+//        Distances.countKernellTrick(2);
+//        Distances.countKernellTrick(-2);
+//        Distances.countKernellTrick(1);
+//        Distances.countKernellTrick(-1);
         System.out.println();
         System.out.println("Som v Epsilon NG "+" .. stav normalized je "+normalized);
            
