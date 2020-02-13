@@ -6,7 +6,9 @@
 package NetworkComponents;
 
 import GUI.Design;
+import java.util.ArrayList;
 import java.util.Random;
+import java.util.TreeMap;
 
 /**
  *
@@ -20,6 +22,15 @@ public class Vertex {
     private double size = 10;
     private Boolean isVisited;
     
+    private ArrayList<Double> valuesOfProps;
+    public TreeMap<Integer, Double> neighoursIdsAndDistances;
+    
+    
+    
+    //props for LRNet
+    private int significanceLRNet = 0;
+    private int numberOfNeighbours = 0;
+    
     private double revValue = -1;
     private String revChange = "";
 
@@ -30,6 +41,7 @@ public class Vertex {
     public Vertex(int id, String label){
         this.id = id;
         this.label = label;
+        this.neighoursIdsAndDistances = new TreeMap<>();
         Random r = new Random();
         this.positionX = r.nextInt(Design.canvasWidth-30); //este upravit
         this.positionY = r.nextInt(Design.canvasHeight-30);
@@ -82,6 +94,22 @@ public class Vertex {
     public void setSize(double size) {
         this.size = size;
     }
+    
+    public void setSignificanceLRNet(int significance)
+    {
+        this.significanceLRNet = significance;
+    }
+    
+    public void setNumberOfNeighbours(int numberOfNeighbours)
+    {
+        this.numberOfNeighbours = numberOfNeighbours;
+    }
+    
+    
+    public void setValuesOfProps(ArrayList<Double>values)
+    {
+        this.valuesOfProps = values;
+    }
 
     @Override
     public String toString() {
@@ -108,4 +136,20 @@ public class Vertex {
         
         return this.isVisited;
     }
+    
+    public int getSignificanceLRNet()
+    {
+        return significanceLRNet;
+    }
+    
+    public int getNumberOfNeighbours()
+    {
+        return numberOfNeighbours;
+    }
+    
+    public ArrayList<Double> getValuesOfProps()
+    {
+        return this.valuesOfProps;
+    }
+    
 }

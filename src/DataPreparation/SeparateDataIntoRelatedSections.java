@@ -57,7 +57,7 @@ public class SeparateDataIntoRelatedSections {
     }
     
     
-    public static ArrayList<Headers> readFile(int begin, int end) throws FileNotFoundException
+    public static ArrayList<Headers> readFile(String path, int begin, int end) throws FileNotFoundException
     {
         ArrayList<Headers> namesForSelectHeaders = new ArrayList<>();
         String[] tempArray;

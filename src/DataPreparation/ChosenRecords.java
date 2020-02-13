@@ -28,6 +28,20 @@ public class ChosenRecords {
         return this.attributesValues;
     }
     
+    
+    public ArrayList<Double> getAttributesValuesAsList()
+    {
+        String[] attributesArray = this.attributesValues.split(",");
+        ArrayList<Double> attributesAsList = new ArrayList<>();
+        
+        for(String attribute : attributesArray)
+        {
+            attributesAsList.add(Double.parseDouble(attribute));
+        }
+        
+        return attributesAsList;
+    }
+    
     public void setAttributesValues(String attribute)
     {
         this.attributesValues += attribute;

@@ -25,4 +25,7 @@ public class UserSettings {
     public static Graph<Vertex, Edge> savedNetwork = null;
     
     public static double maxSliderValue = 0.0;
+    
+    public static String separator = ",";
+    
 }

@@ -9,6 +9,8 @@ import DataPreparation.DataPreparationToNetwork;
 import DataPreparation.Exports;
 import DataPreparation.Headers;
 import DataPreparation.HeadersIndexes;
+import DataPreparation.NEWPreprocessing;
+import DataPreparation.PrepareDifferentDataSource;
 import DataPreparation.SeparateDataIntoRelatedSections;
 import GUI.AlertsWindows;
 import GUI.ChartMaker;
@@ -32,6 +34,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,12 +80,18 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
  * @author pavol
  */
 public class Project2019 extends Application {
+    
+    
+    String pathToFile = "C:\\A11.csv";
+    HBox eatingHabbits;
     
     private Graph<Vertex, Edge> network;
     Canvas canvas1 = new Canvas(Design.canvasWidth, Design.canvasHeight);
@@ -99,6 +108,11 @@ public class Project2019 extends Application {
     int maxK = 7;
     int minK = 1;
     int currentK =2;
+    
+    
+    //to be changed when file is changed
+    TitledPane filtersGridTitlePane;
+    VBox vbox;
     
 
     //filters active-inactive
@@ -129,7 +143,7 @@ public class Project2019 extends Application {
     );
     
      ChoiceBox choicesMetrics = new ChoiceBox(FXCollections.observableArrayList(
-    "Euklidovská", "Čebyševova","Manhattan","Pearsonuv korelační koeficient")
+    "Euklidovská", "Čebyševova","Manhattan")
     );
      
      ChoiceBox choicesEmptyRecords = new ChoiceBox(FXCollections.observableArrayList(
@@ -165,13 +179,37 @@ public class Project2019 extends Application {
     Boolean onlyEpsilonWasChanged = false;
     Boolean dataWasChanged = false;
     
-    private HBox somethin(String label, int readFromIndex, int readToIndex) throws FileNotFoundException
+    
+    private HBox createDifferentHbox()
+    {
+        final HBox HBOXChoices = new HBox();
+        HBOXChoices.setMinWidth(Design.minTableWidth);
+        HBOXChoices.setSpacing(25);
+         MenuButton menuButton = new MenuButton("Atribúty");   
+        List<String> items = new ArrayList();
+        
+        items.add("Atribut 1 ");
+        items.add("Atribut 2");
+        
+         
+        
+        HBOXChoices.getChildren().addAll(menuButton);
+        
+        return HBOXChoices;
+    }
+    
+    private HBox somethin(String label, int readFromIndex, int readToIndex, ArrayList<Headers> headerNames) throws FileNotFoundException
     {
         final HBox HBOXChoices = new HBox();
         HBOXChoices.setMinWidth(Design.minTableWidth);
         HBOXChoices.setSpacing(25);
         
-        allHeaders = SeparateDataIntoRelatedSections.readFile(readFromIndex,readToIndex);
+        
+        if(headerNames == null)
+            allHeaders = SeparateDataIntoRelatedSections.readFile(pathToFile, readFromIndex,readToIndex);
+        
+        else
+            allHeaders = headerNames;
         
         MenuButton menuButton = new MenuButton(label);   
         List<CustomMenuItem> items = new ArrayList();
@@ -320,17 +358,7 @@ public class Project2019 extends Application {
      private MenuBar createMainMenu() {
         MenuBar mainMenu = new MenuBar();
         mainMenu.setMinSize(Design.sceneWidth, 10);
-        
-       /* Menu menuCentralities = new Menu("Možnosti");
-        MenuItem userSettings = new MenuItem("Nastavení");
-        userSettings.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-              UserSettingsWindow u = new UserSettingsWindow();
-              u.openUserSettingsWindow(copyOfPrimaryStage);
-            }
-        });
 
-        menuCentralities.getItems().add(userSettings);*/
    
         Menu menu2 = new Menu("Soubor");
         MenuItem exitItem = new MenuItem("Exit", null);
@@ -352,11 +380,25 @@ public class Project2019 extends Application {
             Exports.saveNetworkAsConnectedVerticesList(copyOfPrimaryStage);
         });
         
-        menu2.getItems().addAll(exitItem, saveAsNetwork, saveAsChosenRecords);
+        
+        MenuItem chooseDataFile = new MenuItem("Načíst datový soubor");
+        chooseDataFile.setOnAction((event) -> {
+            try {
+                chooseFile();
+            } catch (FileNotFoundException ex) {
+                //TODO write error
+                Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        menu2.getItems().addAll(exitItem, saveAsNetwork, saveAsChosenRecords, chooseDataFile);
         
         Menu menuLayouts = new Menu("Layouty");
         MenuItem itemISOMLayout = new MenuItem("ISOM Layout");
         itemISOMLayout.setOnAction((event) -> {
+            checkboxSaveLayout.setSelected(false);
             chosenLayout.setText("Layout: ISOM Layout");
             currentLayout = "ISOM";
             runLayoutOrDisplayWarning("ISOM");
@@ -364,6 +406,7 @@ public class Project2019 extends Application {
 
         MenuItem itemCircularLayout = new MenuItem("Circular Layout");
         itemCircularLayout.setOnAction((event) -> {
+            checkboxSaveLayout.setSelected(false);
             chosenLayout.setText("Layout: Circular Layout");
             currentLayout = "Circular";
             runLayoutOrDisplayWarning("Circular");
@@ -371,6 +414,7 @@ public class Project2019 extends Application {
 
         MenuItem itemKKLayout = new MenuItem("KK Layout");
         itemKKLayout.setOnAction((event) -> {
+            checkboxSaveLayout.setSelected(false);
             chosenLayout.setText("Layout: KK Layout");
             currentLayout = "KK";
             runLayoutOrDisplayWarning("KK");
@@ -378,6 +422,7 @@ public class Project2019 extends Application {
         
         MenuItem itemFRLayout = new MenuItem("FR Layout");
         itemFRLayout.setOnAction((event) -> {
+            checkboxSaveLayout.setSelected(false);
             chosenLayout.setText("Layout: FR Layout");
             currentLayout = "FR";
             runLayoutOrDisplayWarning("FR");
@@ -578,6 +623,38 @@ public class Project2019 extends Application {
         tr.start();
 
     }
+    
+    
+    public void chooseFile() throws FileNotFoundException, IOException {
+        JFileChooser chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+        chooser.setFileFilter(filter);
+        chooser.setMultiSelectionEnabled(false);
+        // Show the dialog; wait until dialog is closed
+        int returnVal = chooser.showOpenDialog(null);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            // Retrieve the selected files.
+           pathToFile = chooser.getSelectedFile().toString();
+        
+           vbox.getChildren().remove(filtersGridTitlePane);
+           vbox.getChildren().remove(eatingHabbits);
+
+           
+           
+  
+           
+         ArrayList<Headers> headers = PrepareDifferentDataSource.getHeaders(pathToFile);
+         HBox a =  somethin("Atributy", 0 , 0, headers);
+         selectedHeaders.clear();
+         vbox.getChildren().add(0,a);
+          
+            NEWPreprocessing.getRelevantRecords(pathToFile, headers, false);
+           
+  
+             
+        }
+
+    }
      
      public HBox createHbox(String label, ChoiceBox locationchoiceBox)
      { 
@@ -710,7 +787,7 @@ public class Project2019 extends Application {
         grade = Integer.parseInt(filterValues.get(0));
         final HBox HBoxfilterByGrade = createHbox(filterByGradeText, choicesGrades);
         
-        TitledPane gridTitlePane = new TitledPane();
+        filtersGridTitlePane = new TitledPane();
         GridPane grid = new GridPane();
         grid.setVgap(4);
         grid.setPadding(new Insets(5, 5, 5, 5));
@@ -719,13 +796,13 @@ public class Project2019 extends Application {
         grid.add(HBoxfilterByGrade, 0, 2);
         grid.add(HBoxfilterByRegion, 0, 3);
         grid.add(HBoxfilterBySchool, 0, 4);        
-        gridTitlePane.setText("Filtry");
-        gridTitlePane.setContent(grid);
-        gridTitlePane.setExpanded(false);
+        filtersGridTitlePane.setText("Filtry");
+        filtersGridTitlePane.setContent(grid);
+        filtersGridTitlePane.setExpanded(false);
         
         //related sections
-        final HBox mb =  somethin("Stravovací návyky", 6,20);
-       // final HBox toDelete =  somethin("Iné veci", 21,30);
+        eatingHabbits =  somethin("Stravovací návyky", 6,20, null);
+        
         
         choicesNetworkMethodCreation.getSelectionModel().selectFirst();
         choicesEmptyRecords.getSelectionModel().selectLast();
@@ -810,23 +887,21 @@ public class Project2019 extends Application {
             try {
                 if(data.isEmpty())
                 {
-                    AlertsWindows.displayAlert("Pro vytvoření sítě je potřeba zvolit data.");
+                         AlertsWindows.displayAlert("Pro vytvoření sítě je potřeba zvolit data.");
+                         
+                    
                 }
                 else
                 {
                     System.out.println("boli zmenene data "+dataWasChanged);
                     
-                    network = DataPreparationToNetwork.readSpecificLines(network,checkboxNormalization.isSelected(),choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex(),selectedHeaders, filterByYear,year, filterBySex,sex, filterByGrade,grade, filterByRegion,region, filterBySchool, school, slider.getValue(),choicesMetrics.getSelectionModel().getSelectedItem().toString());
+                    network = DataPreparationToNetwork.readSpecificLines(pathToFile, network,checkboxNormalization.isSelected(),choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex(),selectedHeaders, filterByYear,year, filterBySex,sex, filterByGrade,grade, filterByRegion,region, filterBySchool, school, slider.getValue(),choicesMetrics.getSelectionModel().getSelectedItem().toString());
                     numberOfVertices.setText("Uzly: "+network.getVertexCount());
                     numberOfEdges.setText("Hrany: "+network.getEdgeCount());
                     double maxNumberOfEdges = (network.getVertexCount()*(network.getVertexCount()-1.0))/2.0;
                     double percentilOfEdges = (network.getEdgeCount()/maxNumberOfEdges)*100;
                     
-                   /* if(percentilOfEdges != Double.NaN)
-                    {
-                        DecimalFormat df = new DecimalFormat("#,##");      
-                        percentilOfEdges = Double.valueOf(df.format(percentilOfEdges));
-                    }*/
+                  
                     
                     
                     sliderValue.setText(slider.getValue()+" -> "+percentilOfEdges+"% hran");
@@ -871,11 +946,11 @@ public class Project2019 extends Application {
         
    separatorTest.setMinHeight(20);
    
-        final VBox vbox = new VBox();
+        vbox = new VBox();
         vbox.setSpacing(5);
         
         vbox.setPadding(new Insets(30, 0, 0, Design.canvasWidth + 50)); //TODO dynamicky posledne bolo 930
-        vbox.getChildren().addAll(gridTitlePane, mb, createTable(table, 1),HBOXNetworkCreation,slider,HBoxNetworkCreationParams,box,separatorTest, buttonCreateNetwork, numberOfVertices, numberOfEdges, chosenLayout);//HBOxPhysical
+        vbox.getChildren().addAll(filtersGridTitlePane, eatingHabbits, createTable(table, 1),HBOXNetworkCreation,slider,HBoxNetworkCreationParams,box,separatorTest, buttonCreateNetwork, numberOfVertices, numberOfEdges, chosenLayout);//HBOxPhysical
    
         root.getChildren().addAll(vbox);
         

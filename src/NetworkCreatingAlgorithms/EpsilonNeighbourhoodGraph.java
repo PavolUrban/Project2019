@@ -115,7 +115,8 @@ public class EpsilonNeighbourhoodGraph {
         Graph<Vertex,Edge> graph = initVertices(numberOfVertices, lines);
      
         int edgeID=0;
-        for (Map.Entry<Integer, String[]> firstObject : map.entrySet()) {
+        for (Map.Entry<Integer, String[]> firstObject : map.entrySet()) 
+        {
             for (Map.Entry<Integer, String[]> secondObject : map.entrySet()){
                 
                   
@@ -153,20 +154,7 @@ public class EpsilonNeighbourhoodGraph {
                     }   
                     
                    
-                    double distance;
-                    
-                    if(distanceMethod == "Pearsonuv korelační koeficient")
-                    {
-                            distance = Distances.countPearsonCorrelationCoefficient(values1,values2, values1.stream().mapToDouble(val -> val).average().orElse(0.0), values2.stream().mapToDouble(val -> val).average().orElse(0.0));
-                            
-                            distance = 1 - Math.abs(distance);
-                            System.out.println("Pearson hodnota "+distance);
-                    }
-                     else
-                    {
-                           distance = countEuclideanDistance(values1, values2);
-                            //System.out.println("euklid hodnota "+distance);
-                    }
+                    double distance = Distances.countDistance(distanceMethod, values1, values2);
          
                     if(distance>maxValue)
                     {

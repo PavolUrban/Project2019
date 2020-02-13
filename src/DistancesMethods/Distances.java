@@ -16,6 +16,38 @@ import java.util.Objects;
  */
 public class Distances {
   
+    //Note: Default method is euclidean 
+    
+  //Pearson  
+//     distance = Distances.countPearsonCorrelationCoefficient(values1,values2, values1.stream().mapToDouble(val -> val).average().orElse(0.0), values2.stream().mapToDouble(val -> val).average().orElse(0.0));
+//                            
+//                            distance = 1 - Math.abs(distance);
+//                            System.out.println("Pearson hodnota "+distance);
+// 
+//   
+    public static double countDistance(String distanceMethod,ArrayList<Double> values1, ArrayList<Double> values2)
+    {
+        double distance;
+        
+      
+        if(distanceMethod.equalsIgnoreCase("Euklidovská") )
+           distance =  countEuclideanDistance(values1, values2);
+        
+        else if(distanceMethod.equalsIgnoreCase("Čebyševova"))
+             distance = countChebyshevDistance(values1, values2);
+        
+        else if(distanceMethod.equalsIgnoreCase("Manhattan"))
+            distance = countManhattanDistance(values1, values2);
+        
+        
+//        else if(distanceMethod.equalsIgnoreCase("Pearsonuv korelační koeficient"))
+//            distance = countPearsonCorrelationCoefficient(values1, values2, distance, distance)
+        
+        else //default
+            distance = countEuclideanDistance(values1, values2);
+        
+        return distance;
+    }
     
     
 //    public static double countKernellTrick(double value)
@@ -24,10 +56,12 @@ public class Distances {
 //        return Math.exp(-value);
 //    }
 //    
-    public double countEuclideanDistance( ArrayList<Double> values1,  ArrayList<Double> values2)
+    public static double countEuclideanDistance( ArrayList<Double> values1,  ArrayList<Double> values2)
     {
+        
+       // System.out.println("Euklid");
         double sum = 0.0;
-        for (int x=0; x<values1.size(); x++)//nezacinam 0 aby sa ignoroval prvy riadok - premysliet
+        for (int x=0; x<values1.size(); x++)
         {
             
             sum += Math.pow(values1.get(x)-values2.get(x),2);
@@ -38,8 +72,9 @@ public class Distances {
         return result;
     }
     
-    public double countManhattanDistance(ArrayList<Double> values1,  ArrayList<Double> values2)
+    public static double countManhattanDistance(ArrayList<Double> values1,  ArrayList<Double> values2)
     {
+        //System.out.println("Manhattan");
         double sum = 0.0;
         for (int x=0; x<values1.size(); x++)//nezacinam 0 aby sa ignoroval prvy riadok - premysliet
         {
@@ -50,8 +85,9 @@ public class Distances {
         return sum;
     }
     
-    public double countChebyshevDistance(ArrayList<Double> values1,  ArrayList<Double> values2)
+    public static double countChebyshevDistance(ArrayList<Double> values1,  ArrayList<Double> values2)
     {
+        //System.out.println("Chebyshev");
         List<Double> distancesBetweenCoordinates = new ArrayList<>();
         
         for (int x=0; x<values1.size(); x++)//nezacinam 0 aby sa ignoroval prvy riadok - premysliet
@@ -95,8 +131,7 @@ public class Distances {
                 
         }
         
-        System.out.println("Jaccard podobnost:" + numberOfEqualAttributes/values1.size());
-        
+      
         return numberOfEqualAttributes/values1.size();
     }
 }

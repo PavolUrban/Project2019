@@ -25,9 +25,9 @@ import java.util.List;
  */
 public class DataPreparationToNetwork {
  
-    public static Graph<Vertex, Edge> readSpecificLines(Graph<Vertex, Edge> network,Boolean normalized,int methodOfNetworkCreation, List<Headers> headers, Boolean filterYear, int year, Boolean filterSex,int sex, Boolean filterGrade, int grade, Boolean filterRegion, int region, Boolean filterSchool, int school, double Epsilon, String emptyRecordAction) throws IOException
+    public static Graph<Vertex, Edge> readSpecificLines(String path, Graph<Vertex, Edge> network,Boolean normalized,int methodOfNetworkCreation, List<Headers> headers, Boolean filterYear, int year, Boolean filterSex,int sex, Boolean filterGrade, int grade, Boolean filterRegion, int region, Boolean filterSchool, int school, double Epsilon, String distanceMethod) throws IOException
     {   
-        File file = new File("C:\\A11.csv"); 
+        File file = new File(path);  //"C:\\A11.csv"
         List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8); 
         lines.remove(0); //remove header
         
@@ -35,20 +35,19 @@ public class DataPreparationToNetwork {
         if(filterYear == true || filterSex == true || filterRegion == true || filterGrade == true ||filterSchool == true)
         {
             //TODO remove records with no filter value in column to prevent NULLPointerException
-            network = getOnlyRelevantRows(methodOfNetworkCreation,network,normalized, headers, lines, filterYear, year, filterSex, sex, filterGrade,grade, filterRegion, region, filterSchool, school, Epsilon, emptyRecordAction);
+            network = getOnlyRelevantRows(methodOfNetworkCreation,network,normalized, headers, lines, filterYear, year, filterSex, sex, filterGrade,grade, filterRegion, region, filterSchool, school, Epsilon, distanceMethod);
         }
         else
         {
             if(methodOfNetworkCreation == 0 )
             {
                 EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
-                System.out.println("Creating network with epsilon = "+emptyRecordAction);
-                network = eng.createNetwork(getOnlyRelevantColumns(headers, lines, emptyRecordAction),Epsilon, emptyRecordAction, normalized); 
+                network = eng.createNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod),Epsilon, distanceMethod, normalized); 
             }
             else
             {
                 KNearestNeighbor knn = new KNearestNeighbor();
-                network = knn.createKNNNetwork(getOnlyRelevantColumns(headers, lines, emptyRecordAction), (int)Epsilon);
+                network = knn.createKNNNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod), (int)Epsilon, distanceMethod);
             }
             
         }
@@ -78,7 +77,7 @@ public class DataPreparationToNetwork {
         return recordMatchAllFilters;
     }
     
-    public static Graph<Vertex, Edge> getOnlyRelevantRows(int methodOfNetworkCreation, Graph<Vertex, Edge> network,Boolean normalized, List<Headers> headers, List<String> lines, Boolean filterYear, int year, Boolean filterSex,int sex, Boolean filterGrade,int grade, Boolean filterRegion,int region, Boolean filterSchool, int school, double Epsilon, String emptyRecordAction) throws FileNotFoundException
+    public static Graph<Vertex, Edge> getOnlyRelevantRows(int methodOfNetworkCreation, Graph<Vertex, Edge> network,Boolean normalized, List<Headers> headers, List<String> lines, Boolean filterYear, int year, Boolean filterSex,int sex, Boolean filterGrade,int grade, Boolean filterRegion,int region, Boolean filterSchool, int school, double Epsilon, String distanceMethod) throws FileNotFoundException
     {
         System.out.println("Method creation je "+methodOfNetworkCreation);
         List<String> finalLines = new ArrayList<>();
@@ -155,21 +154,21 @@ public class DataPreparationToNetwork {
         }
         
         //filtering columns
-        List<ChosenRecords> chosenRecords = getOnlyRelevantColumns(headers, finalLines, emptyRecordAction);
+        List<ChosenRecords> chosenRecords = getOnlyRelevantColumns(headers, finalLines, distanceMethod);
         
         
         
          if(methodOfNetworkCreation == 0 )
          {
                 EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
-                System.out.println("Creating network with epsilon = "+emptyRecordAction);
-                network = eng.createNetwork(chosenRecords, Epsilon, emptyRecordAction, normalized);
+                System.out.println("Creating network with epsilon = "+distanceMethod);
+                network = eng.createNetwork(chosenRecords, Epsilon, distanceMethod, normalized);
          }
         else
         {
             System.out.println("Budem vytvarat siet s KNNN " +Epsilon);
             KNearestNeighbor knn = new KNearestNeighbor();
-            network = knn.createKNNNetwork(chosenRecords, (int)Epsilon);
+            network = knn.createKNNNetwork(chosenRecords, (int)Epsilon, distanceMethod);
         }
         
       
@@ -177,7 +176,7 @@ public class DataPreparationToNetwork {
         return network;
     }
     
-    public static List<ChosenRecords> getOnlyRelevantColumns(List<Headers> headers, List<String> lines, String emptyRecordAction)
+    public static List<ChosenRecords> getOnlyRelevantColumns(List<Headers> headers, List<String> lines, String distanceMethod)
     {
         ToMove.headers = headers;
         int id = 0;
@@ -191,20 +190,16 @@ public class DataPreparationToNetwork {
   }
            
             Boolean hasEmptyProperty = false;
-            String [] array = line.split(",");
-            ChosenRecords cr = new ChosenRecords(Integer.parseInt(array[0])); //array[0] -> cislo dotaznika sluzi ako id
+            String [] array = line.split(","); //TODO split
+            
+            //
+            ChosenRecords cr = new ChosenRecords(Integer.parseInt(array[0])); //array[0] -> cislo dotaznika sluzi ako id TODO opravit ked su ine data
            
             int counter = 0;
             for(Headers h : headers)
             {
-                
-               
-                   
-                
-
-            
                     
-                //System.out.println("Hlavicka "+h.getHeaderName()+" ma id "+h.getId()+" "+array[h.getId()]);
+                System.out.println(id+".Hlavicka "+h.getHeaderName()+" ma id "+h.getId()+" "+array[h.getId()]);
                 
                 if(counter ==0)
                 {
