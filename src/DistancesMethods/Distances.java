@@ -41,8 +41,11 @@ public class Distances {
         
         
 //        else if(distanceMethod.equalsIgnoreCase("Pearsonuv korelační koeficient"))
+//        {
+//            values1.stream().mapToDouble(val -> val).average().orElse(0.0), values2.stream().mapToDouble(val -> val).average().orElse(0.0)
+//        }
 //            distance = countPearsonCorrelationCoefficient(values1, values2, distance, distance)
-        
+//        
         else //default
             distance = countEuclideanDistance(values1, values2);
         

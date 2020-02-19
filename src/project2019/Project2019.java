@@ -13,6 +13,7 @@ import DataPreparation.NEWPreprocessing;
 import DataPreparation.PrepareDifferentDataSource;
 import DataPreparation.SeparateDataIntoRelatedSections;
 import GUI.AlertsWindows;
+import GUI.BoxesRelatedSections;
 import GUI.ChartMaker;
 import GUI.Design;
 import GUI.MyAlerts;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -88,7 +90,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author pavol
  */
 public class Project2019 extends Application {
-    
+   
     
     String pathToFile = "C:\\A11.csv";
     HBox eatingHabbits;
@@ -143,7 +145,7 @@ public class Project2019 extends Application {
     );
     
      ChoiceBox choicesMetrics = new ChoiceBox(FXCollections.observableArrayList(
-    "Euklidovská", "Čebyševova","Manhattan")
+    "Euklidovská", "Čebyševova","Manhattan", "Pearson")
     );
      
      ChoiceBox choicesEmptyRecords = new ChoiceBox(FXCollections.observableArrayList(
@@ -180,23 +182,95 @@ public class Project2019 extends Application {
     Boolean dataWasChanged = false;
     
     
-    private HBox createDifferentHbox()
+    
+    
+    //TODO finish
+    private HBox unfinished(String label, List<Headers> myHeaders)
     {
         final HBox HBOXChoices = new HBox();
         HBOXChoices.setMinWidth(Design.minTableWidth);
         HBOXChoices.setSpacing(25);
-         MenuButton menuButton = new MenuButton("Atribúty");   
-        List<String> items = new ArrayList();
         
-        items.add("Atribut 1 ");
-        items.add("Atribut 2");
+     
+        MenuButton menuButton = new MenuButton(label);   
+        List<CustomMenuItem> items = new ArrayList();
+        List<CheckBox> checkboxes = new ArrayList();
+
+        CheckBox selectAll = new CheckBox("Označit vše");  
         
-         
+        // select/unselect all
+        selectAll.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            public void changed(ObservableValue ov,Boolean old_val, Boolean new_val) 
+            {       
+                for(CheckBox cbo : checkboxes)
+                {
+                    cbo.setSelected(new_val);
+                }
+
+                if(new_val)
+                    selectAll.setText("Odznačit vše");
+                
+                else if(!new_val)
+                     selectAll.setText("Označit vše");
+            }
+        });
+        
+        CustomMenuItem itemSelectAll = new CustomMenuItem(selectAll);
+        itemSelectAll.setHideOnClick(false); 
+
+        items.add(itemSelectAll);
+        
+        for(Headers header : myHeaders)
+        {
+            //for each header prepare Checkbox
+            CheckBox cb0 = new CheckBox(header.getHeaderName()); 
+            
+            cb0.selectedProperty().addListener(new ChangeListener<Boolean>() 
+            {
+                public void changed(ObservableValue ov,Boolean old_val, Boolean new_val) 
+                {
+                    dataWasChanged = true;
+                    
+                    if(new_val)
+                    {
+                        SelectedAtributes myFile = new SelectedAtributes(header.getHeaderName());
+                        data.add(myFile);
+                        System.out.println("Changed "+header.getHeaderName()+" to "+new_val);
+                        selectedHeaders.add(header);
+                    }
+                    
+                    else
+                    {
+                        // check this - data.clear();
+                        selectedHeaders.remove(header);
+                        data.remove(header.getHeaderName());
+                    } 
+                    
+//                     System.out.println("Bude sa nieco diat?? data maju size" + data.size()+" "+choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex());
+                     if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex()==0)
+                     {
+//                         System.out.println("teraz by sa mal nastavovat slider podla velkosti dat");
+                         setSliderDefault(slider, checkboxNormalization.isSelected());
+                     }
+                }
+            });
+        
+            CustomMenuItem item0 = new CustomMenuItem(cb0);
+            item0.setHideOnClick(false); 
+            items.add(item0);
+            checkboxes.add(cb0);
+            dataWasChanged = true;
+        }
+          
+        menuButton.getItems().setAll(items);
         
         HBOXChoices.getChildren().addAll(menuButton);
         
         return HBOXChoices;
     }
+    
+    
+    
     
     private HBox somethin(String label, int readFromIndex, int readToIndex, ArrayList<Headers> headerNames) throws FileNotFoundException
     {
@@ -800,8 +874,14 @@ public class Project2019 extends Application {
         filtersGridTitlePane.setContent(grid);
         filtersGridTitlePane.setExpanded(false);
         
+    
+        Map<Integer, List<Headers>> sectionsHeadersNames =BoxesRelatedSections.something(pathToFile,",");
+
+        
         //related sections
-        eatingHabbits =  somethin("Stravovací návyky", 6,20, null);
+         unfinished("Stravovací návyky", sectionsHeadersNames.get(1));
+
+        eatingHabbits =  somethin("Stravovací návyky", 6,21, null);
         
         
         choicesNetworkMethodCreation.getSelectionModel().selectFirst();

@@ -9,6 +9,7 @@ import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
 import NetworkCreatingAlgorithms.EpsilonNeighbourhoodGraph;
 import NetworkCreatingAlgorithms.KNearestNeighbor;
+import NetworkCreatingAlgorithms.NetworkByTopEdges;
 import UserSettings.ToMove;
 import edu.uci.ics.jung.graph.Graph;
 import java.io.File;
@@ -48,6 +49,7 @@ public class DataPreparationToNetwork {
             {
                 KNearestNeighbor knn = new KNearestNeighbor();
                 network = knn.createKNNNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod), (int)Epsilon, distanceMethod);
+               
             }
             
         }
@@ -169,6 +171,8 @@ public class DataPreparationToNetwork {
             System.out.println("Budem vytvarat siet s KNNN " +Epsilon);
             KNearestNeighbor knn = new KNearestNeighbor();
             network = knn.createKNNNetwork(chosenRecords, (int)Epsilon, distanceMethod);
+            
+             NetworkByTopEdges nbt = new NetworkByTopEdges(chosenRecords, distanceMethod, 10.0);
         }
         
       
