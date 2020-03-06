@@ -25,6 +25,11 @@ public class Distances {
 //                            System.out.println("Pearson hodnota "+distance);
 // 
 //   
+    
+    
+    
+    
+    
     public static double countDistance(String distanceMethod,ArrayList<Double> values1, ArrayList<Double> values2)
     {
         double distance;
@@ -40,11 +45,12 @@ public class Distances {
             distance = countManhattanDistance(values1, values2);
         
         
-//        else if(distanceMethod.equalsIgnoreCase("Pearsonuv korelační koeficient"))
-//        {
-//            values1.stream().mapToDouble(val -> val).average().orElse(0.0), values2.stream().mapToDouble(val -> val).average().orElse(0.0)
-//        }
-//            distance = countPearsonCorrelationCoefficient(values1, values2, distance, distance)
+        else if(distanceMethod.equalsIgnoreCase("Pearson"))
+             distance = countPearsonCorrelationCoefficient(values1, values2);
+        
+        else if(distanceMethod.equalsIgnoreCase("RBF"))
+            distance = countRBF(values1, values2);
+//           
 //        
         else //default
             distance = countEuclideanDistance(values1, values2);
@@ -53,16 +59,30 @@ public class Distances {
     }
     
     
-//    public static double countKernellTrick(double value)
-//    {
-//        System.out.println("Kernell trick e value is "+Math.exp(-value));
-//        return Math.exp(-value);
-//    }
-//    
+    public static double countRBF(ArrayList<Double> values1, ArrayList<Double> values2)
+    {
+        double sum = 0.0;
+        
+        for (int x=0; x<values1.size(); x++)
+        {
+            
+            sum += Math.pow(values1.get(x)-values2.get(x),2);
+        }
+        
+        //lambda = 1/2o^2 -- TODO o should be dynamically set now it is 1 by default
+       
+        double lambda = 1/(Math.pow(2*1, 2));
+        
+        double finalResult = Math.exp( - (sum / lambda));
+        
+        System.out.println("Kernell trick e value is "+finalResult);
+       
+        return finalResult;
+    }
+    
+
     public static double countEuclideanDistance( ArrayList<Double> values1,  ArrayList<Double> values2)
     {
-        
-       // System.out.println("Euklid");
         double sum = 0.0;
         for (int x=0; x<values1.size(); x++)
         {
@@ -77,9 +97,9 @@ public class Distances {
     
     public static double countManhattanDistance(ArrayList<Double> values1,  ArrayList<Double> values2)
     {
-        //System.out.println("Manhattan");
         double sum = 0.0;
-        for (int x=0; x<values1.size(); x++)//nezacinam 0 aby sa ignoroval prvy riadok - premysliet
+     
+        for (int x=0; x<values1.size(); x++)
         {
             
             sum += Math.abs(values1.get(x)- values2.get(x));
@@ -102,10 +122,11 @@ public class Distances {
         return Collections.max(distancesBetweenCoordinates);
     }
     
-    public static double countPearsonCorrelationCoefficient(ArrayList<Double> values1,  ArrayList<Double> values2, double meanValues1, double meanValues2)
+    public static double countPearsonCorrelationCoefficient(ArrayList<Double> values1,  ArrayList<Double> values2)
     {
-        // Double average = values1.stream().mapToInt(val -> val).average().orElse(0.0);
-        
+        Double meanValues1 = values1.stream().mapToDouble(val -> val).average().orElse(0.0);
+        Double meanValues2 = values2.stream().mapToDouble(val -> val).average().orElse(0.0);
+
         double sumUpside = 0.0;
         double sumDownsideValues1 = 0.0;
         double sumDownsideValues2 = 0.0;
@@ -119,8 +140,11 @@ public class Distances {
         }
         
         double finalResult = (sumUpside)/(Math.sqrt(sumDownsideValues1*sumDownsideValues2));
-        
-        return finalResult;
+  
+        //to convert correlation into distance
+        double convertedFinalResult = 1 - Math.abs(finalResult);
+      
+        return convertedFinalResult;
     }
     
     public static double countJaccard(ArrayList<Double> values1, ArrayList<Double> values2)
@@ -136,5 +160,19 @@ public class Distances {
         
       
         return numberOfEqualAttributes/values1.size();
+    }
+    
+    //TODO finish
+    public static void normalize(ArrayList<Double> values1, List<Double> maxValues, List<Double> minValues)
+    {
+        for(int i=0; i < values1.size(); i++)
+        {
+            double min = minValues.get(i);
+            double max = maxValues.get(i);
+            
+            double finalResult = ( values1.get(i) - min ) / ( max - min );
+            
+            values1.set(i, finalResult);
+        }
     }
 }

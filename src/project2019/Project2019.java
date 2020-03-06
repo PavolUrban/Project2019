@@ -15,6 +15,9 @@ import DataPreparation.SeparateDataIntoRelatedSections;
 import GUI.AlertsWindows;
 import GUI.BoxesRelatedSections;
 import GUI.ChartMaker;
+import GUI.CustomDataSourceSettingsView;
+import static GUI.CustomDataSourceSettingsView.chooseFile;
+import static GUI.CustomDataSourceSettingsView.modifyMainPage;
 import GUI.Design;
 import GUI.MyAlerts;
 import GUI.NetworkDrawer;
@@ -36,8 +39,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -51,6 +56,7 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -69,6 +75,9 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.TextFormatter.Change;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
@@ -76,11 +85,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -97,6 +109,7 @@ public class Project2019 extends Application {
     
     private Graph<Vertex, Edge> network;
     Canvas canvas1 = new Canvas(Design.canvasWidth, Design.canvasHeight);
+    
     Stage copyOfPrimaryStage;
     
     ArrayList<Headers> allHeaders;
@@ -139,13 +152,22 @@ public class Project2019 extends Application {
     int school = 0;
     int year = 0;
     
+    //Top edges related
+    TextField textFieldTopEdges = new TextField("20");
+    Label labelTopEdges = new Label("Procento nejvýznamnějších hran: ");
+    
+    
+    //KNN related
+    TextField textFieldKNN = new TextField("2");
+    Label labelKNNRelated = new Label("Hodnota k: ");
+    
     Label labelForSlider = new Label("Hodnota ε:");
     ChoiceBox choicesNetworkMethodCreation = new ChoiceBox(FXCollections.observableArrayList(
-    "ε-okolí ", "KNN")
+    "ε-okolí ", "KNN", "Nejvýznamnejší hrany", "Kombinace ε-okolí a KNN")
     );
     
      ChoiceBox choicesMetrics = new ChoiceBox(FXCollections.observableArrayList(
-    "Euklidovská", "Čebyševova","Manhattan", "Pearson")
+    "Euklidovská", "Čebyševova","Manhattan", "Pearson", "RBF")
     );
      
      ChoiceBox choicesEmptyRecords = new ChoiceBox(FXCollections.observableArrayList(
@@ -163,6 +185,7 @@ public class Project2019 extends Application {
     final Separator separatorTest = new Separator();
     Label numberOfVertices = new Label("Uzly: ");
     Label numberOfEdges = new Label("Hrany: ");
+    Label numberOfComponents = new Label("Komponenty: ");
     Label chosenLayout = new Label ("Layout: KK Layout");
     Slider slider = new Slider(1, 10, 2);
    
@@ -180,6 +203,142 @@ public class Project2019 extends Application {
     
     Boolean onlyEpsilonWasChanged = false;
     Boolean dataWasChanged = false;
+    
+    
+    
+    
+    public void openNewDataSourceWindow(Stage stage)
+    {
+        StackPane secondaryLayout = new StackPane();
+        Scene secondScene = new Scene(secondaryLayout, 400, 400);
+ 
+        String pathToFile;
+        Label labelFilePath = new Label("Vybraný soubor");
+        Label labelFilePathValue = new Label("Nevybráno!");
+        Label labelSeparator = new Label("Separátor");
+
+        Button buttonAddFile = new Button ("Vybrat datový soubor");
+        Stage newWindow;
+        
+        // New window (Stage)
+        newWindow = new Stage();
+        newWindow.setTitle("Import vlastního datového souboru");
+        newWindow.setScene(secondScene);
+
+        // Set position of second window, related to primary window.
+        newWindow.setX(stage.getX() + 200);
+        newWindow.setY(stage.getY() + 100);
+
+        newWindow.show();   
+       
+        buttonAddFile.setOnAction((event) -> {
+    
+            //read file process
+            FileChooser fileChooser = new FileChooser();
+            File selectedFile = fileChooser.showOpenDialog(newWindow);
+        
+            labelFilePathValue.setText(selectedFile.getPath());
+            buttonAddFile.setText("Změnit datový soubor");
+        });          
+        
+        Label labelHeader = new Label("Hlavička");
+        ChoiceBox choiceBoxHeader = new ChoiceBox(FXCollections.observableArrayList("Ano", "Ne"));
+        choiceBoxHeader.setValue("Ano");
+        choiceBoxHeader.setMaxWidth(50);
+        
+        ChoiceBox choiceBoxSeparator = new ChoiceBox(FXCollections.observableArrayList(";", ","));
+        choiceBoxSeparator.setValue(";");
+        choiceBoxSeparator.setMaxWidth(50);
+        
+        GridPane grid = new GridPane();
+        grid.setVgap(4);
+        grid.setHgap(10);
+        grid.setPadding(new Insets(5, 5, 5, 5));
+
+
+        //element, column, row
+        grid.add(labelSeparator, 0, 0);
+        grid.add(choiceBoxSeparator, 1, 0 );
+        
+        grid.add(labelFilePath, 0, 2);
+        grid.add(labelFilePathValue,1 , 2);
+        
+        grid.add(labelHeader, 0, 3);
+        grid.add(choiceBoxHeader, 1, 3);
+      
+        
+        grid.setAlignment(Pos.CENTER);
+        
+        
+        Button buttonSaveOptions = new Button ("Uložit");
+        buttonSaveOptions.setOnAction((event) -> {
+     
+            //file path is not set
+            if(labelFilePathValue.getText().equalsIgnoreCase("Nevybráno!"))
+                AlertsWindows.displayAlert("Pro pokračování je potřeba vybrat soubor");
+            
+            else
+            {
+                newWindow.close();
+                
+                UserSettings.pathToDataset = labelFilePathValue.getText();
+                UserSettings.separator = choiceBoxSeparator.getValue().toString();
+                
+                if(choiceBoxHeader.getValue().toString().equalsIgnoreCase("Ano"))
+                    UserSettings.hasHeader = true;
+                
+                else
+                    UserSettings.hasHeader = false;
+                
+                
+                modifyMainPage(vbox, selectedHeaders, data);
+                
+                ArrayList<Headers> headers = new ArrayList();
+                try {
+                    headers = PrepareDifferentDataSource.getHeaders(UserSettings.pathToDataset);
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                HBox a = new HBox();
+                try {
+                    a = somethin("Atributy", 0 , 0, headers);
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                
+                selectedHeaders.clear();
+                vbox.getChildren().add(0,a);
+          
+                
+                
+                AlertsWindows.optionsSavedDialog();
+            }
+ 
+        });
+        
+        Button buttonCloseOptions = new Button ("Zrušit");
+        buttonCloseOptions.setOnAction((event) -> {
+            //todo add are you sure dialog
+            newWindow.close();
+            //AlertsWindows.areYouSureDialog();
+        });
+        
+        final HBox HBoxButtons = new HBox();
+        HBoxButtons.setMinWidth(Design.minTableWidth);
+        HBoxButtons.setSpacing(25);
+        HBoxButtons.getChildren().addAll(buttonCloseOptions, buttonSaveOptions);
+        HBoxButtons.setAlignment(Pos.CENTER);
+        
+        final VBox vboxCustomSource = new VBox();
+        vboxCustomSource.setSpacing(5);
+        //vbox.setPadding(new Insets(30, 0, 0, Design.canvasWidth + 50)); //TODO dynamicky posledne bolo 930
+        vboxCustomSource.getChildren().addAll(buttonAddFile, grid, HBoxButtons);
+        vboxCustomSource.setAlignment(Pos.CENTER);
+        
+        secondaryLayout.getChildren().addAll(vboxCustomSource);   
+    }
+    
     
     
     
@@ -457,14 +616,7 @@ public class Project2019 extends Application {
         
         MenuItem chooseDataFile = new MenuItem("Načíst datový soubor");
         chooseDataFile.setOnAction((event) -> {
-            try {
-                chooseFile();
-            } catch (FileNotFoundException ex) {
-                //TODO write error
-                Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            openNewDataSourceWindow(copyOfPrimaryStage);          
         });
         
         menu2.getItems().addAll(exitItem, saveAsNetwork, saveAsChosenRecords, chooseDataFile);
@@ -555,6 +707,22 @@ public class Project2019 extends Application {
           snp.getNetworkDensity(network);
         });
         
+        
+        MenuItem numberOfComponents = new MenuItem("Počet komponent");
+        numberOfComponents.setOnAction((event) -> {
+          
+            SimpleNetworkProperties snp = new SimpleNetworkProperties();
+            snp.getNumberOfComponents(network);
+            NetworkDrawer.redrawNetwork(network, canvas1);
+//            UserSettingsWindow usw = new UserSettingsWindow();
+//            usw.openUserSettingsWindow(copyOfPrimaryStage);
+            
+//            
+//            NumberOfComponents noc = new NumberOfComponents(network);
+//            noc.getNumberOfComponents();
+        });
+        
+        
         MenuItem avgCloseness = new MenuItem("Průměrná closeness centralita");
         avgCloseness.setOnAction((event) -> {
            Closennes c = new Closennes(network);
@@ -567,7 +735,7 @@ public class Project2019 extends Application {
           b.count();
         });
         
-        statistics.getItems().addAll(avgDegree,diamter, globalClustCoeff,density, avgCloseness, avgBetween);
+        statistics.getItems().addAll(avgDegree,diamter, globalClustCoeff,density, avgCloseness, avgBetween, numberOfComponents);
         
         
         mainMenu.getMenus().addAll( menu2, menuLayouts, statistics, chartAnalysis); //menuCentralities
@@ -649,7 +817,7 @@ public class Project2019 extends Application {
                 {
                     if(checkboxSaveLayout.isSelected() == true)
                     {
-                           Platform.runLater(new Runnable() {
+                        Platform.runLater(new Runnable() {
                         @Override public void run() {
                         System.out.println("Run later is called and save layout is true");
                          NetworkDrawer.redrawNetwork(network, canvas1);
@@ -729,6 +897,8 @@ public class Project2019 extends Application {
         }
 
     }
+    
+  
      
      public HBox createHbox(String label, ChoiceBox locationchoiceBox)
      { 
@@ -830,6 +1000,25 @@ public class Project2019 extends Application {
         copyOfPrimaryStage = primaryStage;
         Group root = new Group();
         Scene scene = new Scene(root, Design.sceneWidth, Design.sceneHeight/*Color.CADETBLUE*/);
+        
+        
+      
+        
+        
+        
+        
+//        scene.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
+//    @Override
+//    public void handle(MouseEvent mouseEvent) {
+//        if(network != null)
+//        {
+//            Collection<Vertex> vertices = network.getVertices();
+//            ArrayList<Vertex> vv = new ArrayList
+//            
+//        }
+//        System.out.println("mouse click detected! " + mouseEvent.getSource()+ "x: "+mouseEvent.getX() + "y: "+mouseEvent.getY());
+//    }
+//});
        
         primaryStage.setTitle("Nástroj na tvorbu sítí");
         primaryStage.setWidth(Design.sceneWidth);
@@ -893,16 +1082,60 @@ public class Project2019 extends Application {
             Number oldVal, Number newVal) {
 
             System.out.println(observable.getValue());    
+            
+            //Epsilon neighbourhood
             if((int)newVal == 0)
             {
-                 labelForSlider.setText("Hodnota ε:");
-                 setSliderDefault(slider, checkboxNormalization.isSelected());
-            }
-            else
-            {
-                labelForSlider.setText("Hodnota k");
-                setSliderForKnn(slider, maxK, minK, currentK);
+                textFieldKNN.setDisable(true);
+                labelKNNRelated.setDisable(true);
+                labelTopEdges.setDisable(true);
+                textFieldTopEdges.setDisable(true);
+              
+                labelForSlider.setDisable(false);
+                slider.setDisable(false);
+                sliderValue.setDisable(false);
+
                 
+                setSliderDefault(slider, checkboxNormalization.isSelected());
+            }
+            
+            //KNN
+            else if((int)newVal == 1)
+            {
+                labelTopEdges.setDisable(true);
+                textFieldTopEdges.setDisable(true);
+                labelForSlider.setDisable(true);
+                slider.setDisable(true);
+                sliderValue.setDisable(true);
+                
+                textFieldKNN.setDisable(false);
+                labelKNNRelated.setDisable(false);
+            }
+            
+            //Top edges
+            else if((int)newVal == 2)
+            {
+                textFieldKNN.setDisable(true);
+                labelKNNRelated.setDisable(true);
+                labelForSlider.setDisable(true);
+                slider.setDisable(true);
+                sliderValue.setDisable(true);
+           
+                labelTopEdges.setDisable(false);
+                textFieldTopEdges.setDisable(false);
+            }
+            
+            //Combinated Knn and Epsilon
+            else if((int)newVal == 3)
+            {
+                labelTopEdges.setDisable(true);
+                textFieldTopEdges.setDisable(true);
+                
+                textFieldKNN.setDisable(false);
+                labelKNNRelated.setDisable(false);
+                labelForSlider.setDisable(false);
+                slider.setDisable(false);
+                sliderValue.setDisable(false);
             }
 
         }
@@ -965,31 +1198,52 @@ public class Project2019 extends Application {
         Button buttonCreateNetwork =  new Button("Vytvořit síť!");
         buttonCreateNetwork.setOnAction((event) -> {
             try {
+                
+                //if nothing is in params table 
                 if(data.isEmpty())
                 {
-                         AlertsWindows.displayAlert("Pro vytvoření sítě je potřeba zvolit data.");
-                         
-                    
+                    AlertsWindows.displayAlert("Pro vytvoření sítě je potřeba zvolit data.");
                 }
+                
+                //if Kvalue is not set 
+                else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 1 && textFieldKNN.getText().equalsIgnoreCase(""))
+                {
+                    AlertsWindows.displayAlert("Prosím nastavte hodnotu parametru k.");
+                }
+                
+                else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 2 && textFieldTopEdges.getText().equalsIgnoreCase(""))
+                {
+                    AlertsWindows.displayAlert("Prosím nastavte procento nejvýznamnejších hran.");
+                }
+                
+                else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 3 && textFieldKNN.getText().equalsIgnoreCase(""))
+                {
+                
+                }
+                
                 else
                 {
-                    System.out.println("boli zmenene data "+dataWasChanged);
                     
-                    network = DataPreparationToNetwork.readSpecificLines(pathToFile, network,checkboxNormalization.isSelected(),choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex(),selectedHeaders, filterByYear,year, filterBySex,sex, filterByGrade,grade, filterByRegion,region, filterBySchool, school, slider.getValue(),choicesMetrics.getSelectionModel().getSelectedItem().toString());
-                    numberOfVertices.setText("Uzly: "+network.getVertexCount());
-                    numberOfEdges.setText("Hrany: "+network.getEdgeCount());
+                    //TODO toto upravit na nieco rozumnejsie
+                    network = DataPreparationToNetwork.readSpecificLines(network,checkboxNormalization.isSelected(),choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex(),selectedHeaders, filterByYear,year, filterBySex,sex, filterByGrade,grade, filterByRegion,region, filterBySchool, school, slider.getValue(),choicesMetrics.getSelectionModel().getSelectedItem().toString(), textFieldKNN.getText(), textFieldTopEdges.getText());
+              
                     double maxNumberOfEdges = (network.getVertexCount()*(network.getVertexCount()-1.0))/2.0;
                     double percentilOfEdges = (network.getEdgeCount()/maxNumberOfEdges)*100;
+                    numberOfVertices.setText("Uzly: "+network.getVertexCount());
                     
+                    NumberOfComponents noc = new NumberOfComponents(network);
+                    numberOfComponents.setText("Komponenty "+ noc.getNumberOfComponents());
+                    double roundedPercentil = (double) Math.round(percentilOfEdges * 100) / 100;
+                    
+                    numberOfEdges.setText("Hrany: "+network.getEdgeCount()+ " ("+ roundedPercentil + "%)");
                   
                     
                     
-                    sliderValue.setText(slider.getValue()+" -> "+percentilOfEdges+"% hran");
-                    System.out.println("Network hotova "+network.getEdgeCount()+" tolko hran, a tolko uzlov "+network.getVertexCount());
-                    //NetworkDrawer.drawNetwork(network, canvas1);
-                    System.out.println("Vytvaram siet s layoutom "+currentLayout);
+                    sliderValue.setText(slider.getValue()+"");
                     runLayoutOrDisplayWarning(currentLayout);
+                    
                     dataWasChanged = false;
+                    
                     //if Epsilon network - set slider max value
                     if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex()== 0)
                         slider.setMax(UserSettings.maxSliderValue);
@@ -1007,12 +1261,8 @@ public class Project2019 extends Application {
                 Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-
         
-        
-     
         final HBox HBOXNetworkCreation = new HBox(); 
-        
         HBOXNetworkCreation.setSpacing(5);
         HBOXNetworkCreation.getChildren().addAll(labelForSlider, sliderValue);
         
@@ -1022,15 +1272,49 @@ public class Project2019 extends Application {
         
         
         HBoxNetworkCreationParams.getChildren().addAll(labelNetworkCreationMethod, choicesNetworkMethodCreation, labelDistanceMethod,choicesMetrics, labelEmptyRecordsAction, choicesEmptyRecords);
+        separatorTest.setMinHeight(20);
         
         
-   separatorTest.setMinHeight(20);
+        //KNN params
+        
+        UnaryOperator<Change> filter = change -> {
+            String text = change.getText();
+            if (text.matches("[0-9]*")) {
+                return change;
+            }
+
+                return null;
+        };
+        
+        TextFormatter<String> textFormatter = new TextFormatter<>(filter);
+        labelKNNRelated.setDisable(true);
+        textFieldKNN.setDisable(true);
+        textFieldKNN.setMaxWidth(50);
+        textFieldKNN.setTextFormatter(textFormatter);
+        
+       
+        
+        final HBox HBOXNetworkCreationParams = new HBox();
+        HBOXNetworkCreationParams.setSpacing(5);
+ 
+        
+          //Top edges related
+        TextFormatter<String> textFormatter2 = new TextFormatter<>(filter);
+        labelTopEdges.setDisable(true);
+        textFieldTopEdges.setDisable(true);
+        textFieldTopEdges.setMaxWidth(50);
+        textFieldTopEdges.setTextFormatter(textFormatter2);
+        
+        HBOXNetworkCreationParams.getChildren().addAll(labelKNNRelated, textFieldKNN, labelTopEdges , textFieldTopEdges);
+        
    
+      
+       
         vbox = new VBox();
         vbox.setSpacing(5);
         
         vbox.setPadding(new Insets(30, 0, 0, Design.canvasWidth + 50)); //TODO dynamicky posledne bolo 930
-        vbox.getChildren().addAll(filtersGridTitlePane, eatingHabbits, createTable(table, 1),HBOXNetworkCreation,slider,HBoxNetworkCreationParams,box,separatorTest, buttonCreateNetwork, numberOfVertices, numberOfEdges, chosenLayout);//HBOxPhysical
+        vbox.getChildren().addAll(filtersGridTitlePane, eatingHabbits, createTable(table, 1),HBOXNetworkCreation,slider, HBOXNetworkCreationParams, HBoxNetworkCreationParams,box,separatorTest, buttonCreateNetwork, numberOfVertices, numberOfEdges, numberOfComponents, chosenLayout);//HBOxPhysical
    
         root.getChildren().addAll(vbox);
         
@@ -1158,7 +1442,7 @@ public class Project2019 extends Application {
     {
         private final SimpleStringProperty firstName;
 
-        private SelectedAtributes(String fileName) 
+        public SelectedAtributes(String fileName) 
         {
             this.firstName = new SimpleStringProperty(fileName);
         }

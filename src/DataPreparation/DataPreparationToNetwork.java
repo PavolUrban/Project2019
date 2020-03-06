@@ -7,10 +7,13 @@ package DataPreparation;
 
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
+import NetworkCreatingAlgorithms.EpsilonKNNCombinated;
 import NetworkCreatingAlgorithms.EpsilonNeighbourhoodGraph;
+import NetworkCreatingAlgorithms.EpsilonNew;
 import NetworkCreatingAlgorithms.KNearestNeighbor;
 import NetworkCreatingAlgorithms.NetworkByTopEdges;
 import UserSettings.ToMove;
+import UserSettings.UserSettings;
 import edu.uci.ics.jung.graph.Graph;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,31 +29,56 @@ import java.util.List;
  * @author pavol
  */
 public class DataPreparationToNetwork {
+    
+    
+    //normalization related
+    public static List<Double> listMaxValuesForNormalization = new ArrayList();
+    public static List<Double> listMinValuesForNormalization = new ArrayList();
  
-    public static Graph<Vertex, Edge> readSpecificLines(String path, Graph<Vertex, Edge> network,Boolean normalized,int methodOfNetworkCreation, List<Headers> headers, Boolean filterYear, int year, Boolean filterSex,int sex, Boolean filterGrade, int grade, Boolean filterRegion, int region, Boolean filterSchool, int school, double Epsilon, String distanceMethod) throws IOException
+    public static Graph<Vertex, Edge> readSpecificLines(Graph<Vertex, Edge> network,Boolean normalized,int methodOfNetworkCreation, List<Headers> headers, Boolean filterYear, int year, Boolean filterSex,int sex, Boolean filterGrade, int grade, Boolean filterRegion, int region, Boolean filterSchool, int school, double Epsilon, String distanceMethod, String kValue, String topEdgesValue) throws IOException
     {   
-        File file = new File(path);  //"C:\\A11.csv"
+        File file = new File(UserSettings.pathToDataset); 
         List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8); 
         lines.remove(0); //remove header
         
         //TODO
         if(filterYear == true || filterSex == true || filterRegion == true || filterGrade == true ||filterSchool == true)
         {
-            //TODO remove records with no filter value in column to prevent NULLPointerException
             network = getOnlyRelevantRows(methodOfNetworkCreation,network,normalized, headers, lines, filterYear, year, filterSex, sex, filterGrade,grade, filterRegion, region, filterSchool, school, Epsilon, distanceMethod);
         }
         else
         {
             if(methodOfNetworkCreation == 0 )
             {
-                EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
-                network = eng.createNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod),Epsilon, distanceMethod, normalized); 
+                //Todo vyriesit normalizaciu
+                EpsilonNew en = new EpsilonNew();
+                network = en.createEpsilonNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), distanceMethod, Epsilon, true);
+//                System.out.println("Creating epsilon");
+//                EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
+//                network = eng.createNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod),Epsilon, distanceMethod, normalized); 
             }
-            else
+            else if(methodOfNetworkCreation == 1)
             {
                 KNearestNeighbor knn = new KNearestNeighbor();
-                network = knn.createKNNNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod), (int)Epsilon, distanceMethod);
-               
+                network = knn.createKNNNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), Integer.parseInt(kValue), distanceMethod);
+                
+                //System.out.println("Kcko mame na "+ kValue);
+            }
+            
+            else if(methodOfNetworkCreation == 2)
+            {
+                NetworkByTopEdges nbt = new NetworkByTopEdges();
+                network = nbt.createNetworkByTopEdges(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), distanceMethod, Double.parseDouble(topEdgesValue));
+                
+                //System.out.println("Top edges mame na "+ topEdgesValue);
+            }
+            
+            else if(methodOfNetworkCreation == 3)
+            {
+                EpsilonKNNCombinated eknn = new EpsilonKNNCombinated();
+                network = eknn.createNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized),distanceMethod, Epsilon, Integer.parseInt(kValue));
+                
+                //System.out.println("combinated mame na epsilon " +Epsilon+" ,KNN: "+ kValue);
             }
             
         }
@@ -91,7 +120,7 @@ public class DataPreparationToNetwork {
         int a = 0;
         for(String line : lines)
         {
-            if(a>201)
+            if(a>12)
             {
                 break;
             }
@@ -156,7 +185,7 @@ public class DataPreparationToNetwork {
         }
         
         //filtering columns
-        List<ChosenRecords> chosenRecords = getOnlyRelevantColumns(headers, finalLines, distanceMethod);
+        List<ChosenRecords> chosenRecords = getOnlyRelevantColumns(headers, finalLines, distanceMethod, normalized);
         
         
         
@@ -172,7 +201,7 @@ public class DataPreparationToNetwork {
             KNearestNeighbor knn = new KNearestNeighbor();
             network = knn.createKNNNetwork(chosenRecords, (int)Epsilon, distanceMethod);
             
-             NetworkByTopEdges nbt = new NetworkByTopEdges(chosenRecords, distanceMethod, 10.0);
+            
         }
         
       
@@ -180,67 +209,121 @@ public class DataPreparationToNetwork {
         return network;
     }
     
-    public static List<ChosenRecords> getOnlyRelevantColumns(List<Headers> headers, List<String> lines, String distanceMethod)
+    
+    
+    public static List<ChosenRecords> getOnlyRelevantColumns(List<Headers> headers, List<String> lines, String distanceMethod, boolean normalization)
     {
         ToMove.headers = headers;
-        int id = 0;
         List<ChosenRecords> chosenRecords = new ArrayList();
+        int id = 0;
         
         for(String line : lines)
         {
-            if(id>200)
+            //todo remove this cycle
+            if(id>151)
             {
                 break;
-  }
-           
-            Boolean hasEmptyProperty = false;
-            String [] array = line.split(","); //TODO split
-            
-            //
-            ChosenRecords cr = new ChosenRecords(Integer.parseInt(array[0])); //array[0] -> cislo dotaznika sluzi ako id TODO opravit ked su ine data
-           
-            int counter = 0;
-            for(Headers h : headers)
-            {
-                    
-                System.out.println(id+".Hlavicka "+h.getHeaderName()+" ma id "+h.getId()+" "+array[h.getId()]);
-                
-                if(counter ==0)
-                {
-                    if(array[h.getId()].equalsIgnoreCase("") || array[h.getId()]==null || array[h.getId()].isEmpty()) 
-                    {
-                        //System.out.println("Empty property");
-                        hasEmptyProperty = true;   
-                    }
-                     
-                   
-                    
-                    cr.attributesValues = array[h.getId()];
-                }
-                else
-                {
-                    if(array[h.getId()].equalsIgnoreCase("") || array[h.getId()]==null || array[h.getId()].isEmpty()) 
-                    {
-                        //System.out.println("Empty property");
-                        hasEmptyProperty = true;
-                    }
-                    cr.attributesValues = cr.attributesValues+ ","+array[h.getId()];
-                }
-                counter++;
             }
            
+            boolean hasEmptyProperty = false;
+
+            String [] array = line.split(UserSettings.separator); 
+           
+            ChosenRecords cr = null;
+             
+            
+            if(UserSettings.pathToDataset.equalsIgnoreCase("C:\\A11.csv")) //TODO tu tie cesty osetrit nejak rozumnejsie, umoznit mat id stlpec
+                cr = new ChosenRecords(Integer.parseInt(array[0])); //array[0] -> cislo dotaznika sluzi ako id TODO opravit ked su ine data
+           
+            else
+                cr = new ChosenRecords(id);
+                
+            for(Headers h : headers)
+            {
+                if(array[h.getId()].equalsIgnoreCase("") || array[h.getId()]==null || array[h.getId()].isEmpty()) 
+                {
+                    hasEmptyProperty = true;
+                    break;
+                }           
+                
+                else
+                {
+                  String localeValue = array[h.getId()].replaceAll(",",".");
+                  cr.attributesValues.add(Double.parseDouble(localeValue));
+                }
+            }
+           
+            //add only records with complete set of list - todo add median or something like that
             if(!hasEmptyProperty)
             {
-               
                 chosenRecords.add(cr);
             }
             
             id++;
         }
         
+        
+        if(normalization)
+        {
+            prepareMinAndMaxForNormalization(chosenRecords);
+            doNormalization(chosenRecords);
+            System.out.println("Normalization done");
+        }
+        
         return chosenRecords;
     }
     
     
+    public static void doNormalization(List<ChosenRecords> chosenRecords)
+    {    
+        for(ChosenRecords singleRecord : chosenRecords)
+        {       
+            ArrayList<Double> currentValues = singleRecord.getAttributesValuesAsList();
+    
+            for(int i = 0; i < currentValues.size(); i++)
+            {
+                
+                double min = listMinValuesForNormalization.get(i);
+                double max = listMaxValuesForNormalization.get(i);
+                
+                double normalizedValue = ( currentValues.get(i) - min ) / ( max - min); 
+ 
+                currentValues.set(i, normalizedValue);              
+            }        
+            
+            singleRecord.attributesValues = currentValues;
+        }
+        
+        
+    }
+    
+    
+    public static void prepareMinAndMaxForNormalization(List<ChosenRecords> chosenRecords)
+    {
+        //default initalization
+        List<Double> minValues = new ArrayList<>(chosenRecords.get(0).getAttributesValuesAsList());
+        List<Double> maxValues = new ArrayList<>(chosenRecords.get(0).getAttributesValuesAsList());
+       
+        for(ChosenRecords singleRecord : chosenRecords)
+        {           
+            List<Double> currentValues = singleRecord.getAttributesValuesAsList();
+  
+            for(int i = 0; i < currentValues.size(); i++)
+            {
+                double currentValue = currentValues.get(i);
+                
+                if( currentValue < minValues.get(i) )
+                    minValues.set(i, currentValue);
+              
+                else if( currentValue > maxValues.get(i))
+                    maxValues.set(i, currentValue);
+            }
+        }
+        
+        listMaxValuesForNormalization = maxValues;
+        listMinValuesForNormalization = minValues;
+    }
+    
+   
     
 }

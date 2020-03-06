@@ -6,6 +6,7 @@
 package DataPreparation;
 
 import GUI.Design;
+import UserSettings.UserSettings;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class PrepareDifferentDataSource {
            String record = scanner.next();
            
           
-           tempArray = record.split(";"); //TODO
+           tempArray = record.split(UserSettings.separator); //TODO
          
            for(int i=0;i<tempArray.length; i++)
            {

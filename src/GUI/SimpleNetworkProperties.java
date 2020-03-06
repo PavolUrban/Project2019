@@ -41,6 +41,22 @@ public class SimpleNetworkProperties {
      }
      
     
+     public void getNumberOfComponents(Graph<Vertex, Edge> network)
+     {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Počet komponent");
+        alert.setHeaderText("Počet komponent v síti je: ");
+
+        
+        NumberOfComponents noc = new NumberOfComponents(network);
+        int componentsNumber = noc.getNumberOfComponents();
+        
+        alert.setContentText(""+componentsNumber);
+
+        alert.showAndWait();
+     
+     }
+     
      
      public void getAverageDegree(Graph<Vertex, Edge> network)
      {

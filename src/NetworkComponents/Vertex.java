@@ -25,7 +25,8 @@ public class Vertex {
     private ArrayList<Double> valuesOfProps;
     public TreeMap<Integer, Double> neighoursIdsAndDistances;
     
-    
+    //use for colorize vertices in clusters
+    public int clusterId = 0;
     
     //props for LRNet
     private int significanceLRNet = 0;

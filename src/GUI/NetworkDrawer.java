@@ -10,6 +10,8 @@ import NetworkComponents.Vertex;
 import UserSettings.UserSettings;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.Pair;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import javafx.scene.canvas.Canvas;
@@ -21,6 +23,12 @@ import javafx.scene.paint.Color;
  * @author pavol
  */
 public class NetworkDrawer {
+    
+    static List<Color> colors = new ArrayList(Arrays.asList(Color.CORAL, Color.CHARTREUSE, Color.BROWN, Color.BLUE, Color.BURLYWOOD,
+                                                     Color.DARKSEAGREEN, Color.SILVER, Color.AQUA, Color.YELLOW, Color.BLUEVIOLET,
+                                                     Color.CADETBLUE, Color.FUCHSIA, Color.DARKORANGE, Color.KHAKI,Color.PINK,
+                                                     Color.ROSYBROWN, Color.SPRINGGREEN, Color.BLACK));
+    
     
      private static void drawEdge(GraphicsContext gc, double fromX, double fromY, double toX, double toY, double edgeWidth, Color color) {
         gc.setLineWidth(edgeWidth);
@@ -74,12 +82,20 @@ public class NetworkDrawer {
             Pair<Vertex> p = network.getEndpoints(e);
             Vertex v = p.getFirst();
             Vertex v2 = p.getSecond();
-            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
+//            System.out.println(UserSettings.maxSliderValue + " vs "+ e.getWeight()/UserSettings.maxSliderValue);
+            double normalizedEdgeWeight = 1 - ( e.getWeight()/UserSettings.maxSliderValue) + 0.2; // + 0,2 to visible maximally weighted edge which would have value 0
+           
+            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), Math.pow(normalizedEdgeWeight, 3), Color.BLACK);
         }             
-                   
+         
+        
         for (Vertex v : network.getVertices()) 
         {
-            drawVertex(gc, v, Color.CORAL, false); //skontrolovat ci je spravne
+            if(v.clusterId > colors.size() - 1) // - 1 because of indexing
+                drawVertex(gc, v, Color.CORAL, false); //skontrolovat ci je spravne
+            
+            else
+                drawVertex(gc, v, colors.get(v.clusterId), false);
         }
     }
     
@@ -129,12 +145,18 @@ public class NetworkDrawer {
             }
             
             
-            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.1, Color.BLACK);
+            double normalizedEdgeWeight = 1 - ( e.getWeight()/UserSettings.maxSliderValue) + 0.2; // + 0,2 to visible maximally weighted edge which would have value 0
+    
+            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), Math.pow(normalizedEdgeWeight, 3), Color.BLACK);
         }             
                    
         for (Vertex v : network.getVertices()) 
         {
-            drawVertex(gc, v, Color.CORAL, true); //skontrolovat ci je spravne
+             if(v.clusterId > colors.size() - 1) // - 1 because of indexing
+                drawVertex(gc, v, Color.CORAL, true); //skontrolovat ci je spravne
+            
+            else
+                drawVertex(gc, v, colors.get(v.clusterId), true); //skontrolovat ci je spravne
         }  
     }
     

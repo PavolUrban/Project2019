@@ -15,38 +15,25 @@ import java.util.List;
 public class ChosenRecords {
     
     int id;
-    String attributesValues;
+    ArrayList<Double> attributesValues;
     
     public ChosenRecords(int id)
     {
         this.id = id;
-        this.attributesValues ="";
+        this.attributesValues = new ArrayList();
+        
     }
     
-    public String getAttributesValues()
+    public ArrayList<Double> getAttributesValuesAsList()
     {
         return this.attributesValues;
     }
     
-    
-    public ArrayList<Double> getAttributesValuesAsList()
-    {
-        String[] attributesArray = this.attributesValues.split(",");
-        ArrayList<Double> attributesAsList = new ArrayList<>();
-        
-        for(String attribute : attributesArray)
-        {
-            attributesAsList.add(Double.parseDouble(attribute));
-        }
-        
-        return attributesAsList;
-    }
-    
-    public void setAttributesValues(String attribute)
-    {
-        this.attributesValues += attribute;
-    }
-    
+//    public String getAttributesValues()
+//    {
+//        return this.attributesValues;
+//    }
+
     public int getRecordId()
     {
         return this.id;

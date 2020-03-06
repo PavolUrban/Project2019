@@ -9,6 +9,7 @@ import DataPreparation.ChosenRecords;
 import DistancesMethods.Distances;
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
+import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseGraph;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +24,7 @@ import java.util.List;
 public class NetworkByTopEdges {
  
     
-    public NetworkByTopEdges(List<ChosenRecords> lines, String distanceMethod, double percentil)
+    public Graph<Vertex, Edge> createNetworkByTopEdges(List<ChosenRecords> lines, String distanceMethod, double percentil)
     {
         List<Vertex> vertices = new ArrayList<>(); 
         SparseGraph <Vertex, Edge> graph = new SparseGraph<>();
@@ -60,14 +61,20 @@ public class NetworkByTopEdges {
         ArrayList<Edge> sortedEdges = new ArrayList<>(allPossibleEdges);
        
         Collections.sort(sortedEdges);
+        
+        for(Edge e: sortedEdges)
+        {
+            System.out.println(e.getId() + " "+ e.getWeight());
+        }
    
         
         
         
         double edgesToAdd = (percentil / 100) * sortedEdges.size();
         System.out.println("We should add "+edgesToAdd +" current number of edges is "+sortedEdges.size());
-        int numberOfAddedEdges =0;
-        for(Edge e : allPossibleEdges)
+        int numberOfAddedEdges = 0;
+        
+        for(Edge e : sortedEdges)
         {
             if(numberOfAddedEdges > edgesToAdd)
                 graph.removeEdge(e);
@@ -75,8 +82,18 @@ public class NetworkByTopEdges {
             numberOfAddedEdges++;
         }
            
-        System.out.println("Now there are "+ graph.getEdgeCount());
+        Collection<Edge> realEdgesInGraph = graph.getEdges();
         
+        
+        System.out.println("TOTO TU MAME NAOZAJ");
+        for(Edge e: realEdgesInGraph)
+        {
+            System.out.println(e.getId()+ ", weight: "+e.getWeight());
+        }
+        
+        System.out.println("Now there are "+ graph.getEdgeCount());
+       
+        return graph;
     }
     
 }

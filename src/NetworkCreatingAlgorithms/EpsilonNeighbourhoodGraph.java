@@ -43,13 +43,7 @@ public class EpsilonNeighbourhoodGraph {
     public Graph<Vertex, Edge> createNetwork(List<ChosenRecords> lines, double Epsilon, String distanceMethod, Boolean normalized) throws FileNotFoundException
     {
         double maxValue = 0.0;
-//        Distances.countKernellTrick(2);
-//        Distances.countKernellTrick(-2);
-//        Distances.countKernellTrick(1);
-//        Distances.countKernellTrick(-1);
-        System.out.println();
-        System.out.println("Som v Epsilon NG "+" .. stav normalized je "+normalized);
-           
+        
         String[] tempArray;
         ToMove.chosenRecords =lines;
         Map<Integer, String[]> map = new HashMap<Integer, String[]>();
@@ -176,20 +170,5 @@ public class EpsilonNeighbourhoodGraph {
         UserSettings.maxSliderValue = maxValue;
         
         return graph;
-    }
-
-
-    public double countEuclideanDistance( ArrayList<Double> values1,  ArrayList<Double> values2)
-    {
-        double sum = 0.0;
-        for (int x=0; x<values1.size(); x++)//nezacinam 0 aby sa ignoroval prvy riadok - premysliet
-        {
-            
-            sum += Math.pow(values1.get(x)-values2.get(x),2);
-        }
-
-        double result = Math.sqrt(sum);
-        
-        return result;
     }
 }

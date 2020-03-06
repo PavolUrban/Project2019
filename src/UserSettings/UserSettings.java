@@ -8,6 +8,7 @@ package UserSettings;
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
 import edu.uci.ics.jung.graph.Graph;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class UserSettings {
     
     public static double maxSliderValue = 0.0;
     
-    public static String separator = ",";
     
+    //properties for datasoruce reading
+    public static String separator = ",";
+    public static String pathToDataset = "C:\\A11.csv";
+    public static boolean hasHeader = true;
 }

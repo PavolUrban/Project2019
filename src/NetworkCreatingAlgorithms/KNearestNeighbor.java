@@ -103,7 +103,7 @@ public class KNearestNeighbor {
             {
 //                String key = entry.getKey();
 //                Integer value = entry.getValue();
-                graph.addEdge(new Edge(edgeID), vertices.get(v1Index), vertices.get(neighbour.getKey()));
+                graph.addEdge(new Edge(edgeID, neighbour.getValue()), vertices.get(v1Index), vertices.get(neighbour.getKey()));
                 edgeID++;
              }
             

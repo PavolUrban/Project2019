@@ -64,23 +64,23 @@ public class NEWPreprocessing {
             int counter = 0;
             for(Headers h : headers)
             {
-                if(counter ==0)
-                {
-                    hasEmptyProperty = checkIfSomeOfPropertiesIsEmpty(propertiesValues, h);
-                    cr.attributesValues = propertiesValues[h.getId()];
-                }
-                else
-                {
-                    hasEmptyProperty = checkIfSomeOfPropertiesIsEmpty(propertiesValues, h);
-                    cr.attributesValues = cr.attributesValues+ ","+propertiesValues[h.getId()];
-                }
+//                if(counter ==0)
+//                {
+//                    hasEmptyProperty = checkIfSomeOfPropertiesIsEmpty(propertiesValues, h);
+//                    cr.attributesValues = propertiesValues[h.getId()];
+//                }
+//                else
+//                {
+//                    hasEmptyProperty = checkIfSomeOfPropertiesIsEmpty(propertiesValues, h);
+//                    cr.attributesValues = cr.attributesValues+ ","+propertiesValues[h.getId()];
+//                }
                 counter++;
             }
            
             if(!hasEmptyProperty)
             {
                 chosenRecords.add(cr); //todo check other possibilities when hasEmptyProperty is True
-                System.out.println(cr.getAttributesValues());
+//                System.out.println(cr.getAttributesValues());
             }
             
             id++;

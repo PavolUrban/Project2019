@@ -19,9 +19,9 @@ public class AlertsWindows {
     public static void optionsSavedDialog()
     {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information Dialog");
-        alert.setHeaderText("Success");
-        alert.setContentText("Options were changed");
+        alert.setTitle("Informační dialog");
+        alert.setHeaderText("Uložení dokončeno");
+        alert.setContentText("Změny byli úspěšně uloženy.");
 
         alert.showAndWait();
     }
@@ -52,8 +52,8 @@ public class AlertsWindows {
     
     public static void displayAlert(String alertText) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error Dialog");
-        alert.setHeaderText("An error here");
+        alert.setTitle("Chybový dialog");
+        alert.setHeaderText("Chyba");
         alert.setContentText(alertText);
 
         alert.showAndWait();
