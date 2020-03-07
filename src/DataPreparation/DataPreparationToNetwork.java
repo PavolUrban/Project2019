@@ -5,6 +5,8 @@
  */
 package DataPreparation;
 
+import GUI.AlertsWindows;
+import GUI.MyAlerts;
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
 import NetworkCreatingAlgorithms.EpsilonKNNCombinated;
@@ -23,6 +25,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javafx.scene.control.Alert;
 
 /**
  *
@@ -52,7 +55,7 @@ public class DataPreparationToNetwork {
             {
                 //Todo vyriesit normalizaciu
                 EpsilonNew en = new EpsilonNew();
-                network = en.createEpsilonNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), distanceMethod, Epsilon, true);
+                network = en.createEpsilonNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), distanceMethod, Epsilon);
 //                System.out.println("Creating epsilon");
 //                EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
 //                network = eng.createNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod),Epsilon, distanceMethod, normalized); 
@@ -191,9 +194,12 @@ public class DataPreparationToNetwork {
         
          if(methodOfNetworkCreation == 0 )
          {
-                EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
-                System.out.println("Creating network with epsilon = "+distanceMethod);
-                network = eng.createNetwork(chosenRecords, Epsilon, distanceMethod, normalized);
+             EpsilonNew epsilonNew = new EpsilonNew();
+             epsilonNew.createEpsilonNetwork(chosenRecords, distanceMethod, Epsilon);
+             
+//                EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
+//                System.out.println("Creating network with epsilon = "+distanceMethod);
+//                network = eng.createNetwork(chosenRecords, Epsilon, distanceMethod, normalized);
          }
         else
         {
@@ -213,6 +219,10 @@ public class DataPreparationToNetwork {
     
     public static List<ChosenRecords> getOnlyRelevantColumns(List<Headers> headers, List<String> lines, String distanceMethod, boolean normalization)
     {
+        //restart non-numeric properties
+        UserSettings.hasNonNumericProperty = false;
+        UserSettings.nonNumericPropertiesNames.clear();
+        
         ToMove.headers = headers;
         List<ChosenRecords> chosenRecords = new ArrayList();
         int id = 0;
@@ -249,7 +259,19 @@ public class DataPreparationToNetwork {
                 else
                 {
                   String localeValue = array[h.getId()].replaceAll(",",".");
-                  cr.attributesValues.add(Double.parseDouble(localeValue));
+                  if(isDouble(localeValue))
+                  {
+                      cr.attributesValues.add(Double.parseDouble(localeValue));
+                  }
+                  else
+                  {
+                    
+                    UserSettings.hasNonNumericProperty = true;
+                    
+                    if(!UserSettings.nonNumericPropertiesNames.contains(h.headerName))
+                        UserSettings.nonNumericPropertiesNames.add(h.headerName);  
+                  }
+                  
                 }
             }
            
@@ -323,6 +345,16 @@ public class DataPreparationToNetwork {
         listMaxValuesForNormalization = maxValues;
         listMinValuesForNormalization = minValues;
     }
+    
+    
+    public static boolean isDouble(String value) {
+    try {
+        Double.parseDouble(value);
+        return true;
+    } catch (NumberFormatException e) {
+        return false;
+    }
+}
     
    
     

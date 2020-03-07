@@ -27,9 +27,13 @@ public class UserSettings {
     
     public static double maxSliderValue = 0.0;
     
+    //property used if user wants use non-numeric attribute for network creation
+    public static boolean hasNonNumericProperty = false;
+    public static List<String> nonNumericPropertiesNames = new ArrayList();
     
     //properties for datasoruce reading
     public static String separator = ",";
     public static String pathToDataset = "C:\\A11.csv";
     public static boolean hasHeader = true;
+    
 }

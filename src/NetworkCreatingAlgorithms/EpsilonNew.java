@@ -22,11 +22,12 @@ import java.util.List;
 public class EpsilonNew {
     
     
-    public Graph<Vertex, Edge> createEpsilonNetwork(List<ChosenRecords> lines, String distanceMethod, double epsilon, boolean normalize)
+    public Graph<Vertex, Edge> createEpsilonNetwork(List<ChosenRecords> lines, String distanceMethod, double epsilon)
     {
         List<Vertex> vertices = new ArrayList<>(); 
         SparseGraph <Vertex, Edge> graph = new SparseGraph<>();
-        
+
+        //add vertices and get values from proper columns (attributes)
         for(ChosenRecords cr : lines)
         {
             ArrayList<Double> values = cr.getAttributesValuesAsList();
@@ -38,32 +39,17 @@ public class EpsilonNew {
             vertices.add(v);
             graph.addVertex(v);
         }
-        
-        
-        
-        
-        
-//        if(normalize)
-//        {
-//            for(Vertex v : vertices)
-//            {
-//                ArrayList<Double> properties = v.getValuesOfProps();
-//                for(int i = 0; i < properties.size();i++)
-//                {
-//                    
-//                }
-//            }
-//        }
-        
+       
         
         int edgeId = 0;
         double maxDistance = 0.0;
         
+        //add edges
         for(Vertex v1 : vertices)
         {
             for(Vertex v2 : vertices)
             {
-                if(v1.getId() != v2.getId())
+                if(v1.getId() != v2.getId()) //self-loops dissalowed
                 {
                     double distance = Distances.countDistance(distanceMethod, v1.getValuesOfProps(), v2.getValuesOfProps());
                     
@@ -87,6 +73,5 @@ public class EpsilonNew {
         return graph;
         
     }
-    
-    
+
 }

@@ -40,135 +40,135 @@ public class EpsilonNeighbourhoodGraph {
         return graph;
     }
     
-    public Graph<Vertex, Edge> createNetwork(List<ChosenRecords> lines, double Epsilon, String distanceMethod, Boolean normalized) throws FileNotFoundException
-    {
-        double maxValue = 0.0;
-        
-        String[] tempArray;
-        ToMove.chosenRecords =lines;
-        Map<Integer, String[]> map = new HashMap<Integer, String[]>();
-        int numberOfVertices = 0;
-        List<Integer> maxValues = new ArrayList<Integer>();
-           List<Integer> minValues = new ArrayList<Integer>();
-        
-        for(ChosenRecords cr : lines)
-        {    
-            String record = cr.getAttributesValues();
-            //System.out.println("jaaja "+ record);
-            tempArray = record.split(",");
-            map.put(numberOfVertices, tempArray);
-            numberOfVertices++;
-        }
-       
-       if(normalized)
-       {
-           
-           Boolean firstTime = true;
-           for (Map.Entry<Integer, String[]> firstObject : map.entrySet()) {
-               
-               int position = 0;
-               for(String singleValue : firstObject.getValue())
-                {
-                    int value = Integer.parseInt(singleValue);
-                       if(firstTime)
-                       {
-                           maxValues.add(value);
-                           minValues.add(value);
-                       }
-                       
-                       else
-                       {
-                           if(value > maxValues.get(position))
-                           {
-                               maxValues.set(position, value);
-                           }
-                           
-                           if(value< minValues.get(position))
-                           {
-                               minValues.set(position, value);
-                           }
-                       }
-                       position++;
-                }
-               
-               firstTime = false;
-         }
-           System.out.println("*********Min values");
-           for(Integer min : minValues)
-           {
-               System.out.println("\t"+min);
-           }
-           System.out.println("********Max values");
-           for(Integer max : maxValues)
-           {
-           System.out.println("\t"+max);
-           }
-       }
-        
-       
-        Graph<Vertex,Edge> graph = initVertices(numberOfVertices, lines);
-     
-        int edgeID=0;
-        for (Map.Entry<Integer, String[]> firstObject : map.entrySet()) 
-        {
-            for (Map.Entry<Integer, String[]> secondObject : map.entrySet()){
-                
-                  
-                 ArrayList<Double> values1 = new ArrayList<>();
-                 ArrayList<Double> values2 = new ArrayList<>();
-                
-                if(firstObject.getKey() != secondObject.getKey() && secondObject.getKey()>firstObject.getKey())
-                {
-                    int position1 = 0;
-                    int position2= 0;
-                    for(String singleValue : firstObject.getValue())
-                    {
-                        if(normalized)
-                        {
-                            double normalizedValue = (Double.parseDouble(singleValue)-minValues.get(position1))/(maxValues.get(position1)-minValues.get(position1));
-                            values1.add(normalizedValue);
-                        }
-                        else
-                            values1.add(Double.parseDouble(singleValue));
-                        
-                        position1++;
-                    }
-                    
-                    for(String singleValue : secondObject.getValue())
-                    {
-                        if(normalized)
-                        {
-                            double normalizedValue = (Double.parseDouble(singleValue)-minValues.get(position2))/(maxValues.get(position2)-minValues.get(position2));
-                            values2.add(normalizedValue);
-                        }
-                        else
-                            values2.add(Double.parseDouble(singleValue));
-                        
-                        position2++;
-                    }   
-                    
-                   
-                    double distance = Distances.countDistance(distanceMethod, values1, values2);
-         
-                    if(distance>maxValue)
-                    {
-                        maxValue = distance;
-                    }
-                    
-                    if(distance< Epsilon)
-                    {
-                        graph.addEdge(new Edge(edgeID), vertices[firstObject.getKey()], vertices[secondObject.getKey()]);
-                        edgeID++;
-                    }
-                    
-                   // Distances.countJaccard(values1, values2);
-                    //System.out.println("Vzdialenost medzi "+firstObject.getKey()+" "+secondObject.getKey()+" je "+countEuclideanDistance(values1, values2));
-                }
-            }
-        }
-        
-        UserSettings.maxSliderValue = maxValue;
-        
-        return graph;
-    }
+//    public Graph<Vertex, Edge> createNetwork(List<ChosenRecords> lines, double Epsilon, String distanceMethod, Boolean normalized) throws FileNotFoundException
+//    {
+//        double maxValue = 0.0;
+//        
+//        String[] tempArray;
+//        ToMove.chosenRecords =lines;
+//        Map<Integer, String[]> map = new HashMap<Integer, String[]>();
+//        int numberOfVertices = 0;
+//        List<Integer> maxValues = new ArrayList<Integer>();
+//           List<Integer> minValues = new ArrayList<Integer>();
+//        
+//        for(ChosenRecords cr : lines)
+//        {    
+//            String record = cr.getAttributesValues();
+//            //System.out.println("jaaja "+ record);
+//            tempArray = record.split(",");
+//            map.put(numberOfVertices, tempArray);
+//            numberOfVertices++;
+//        }
+//       
+//       if(normalized)
+//       {
+//           
+//           Boolean firstTime = true;
+//           for (Map.Entry<Integer, String[]> firstObject : map.entrySet()) {
+//               
+//               int position = 0;
+//               for(String singleValue : firstObject.getValue())
+//                {
+//                    int value = Integer.parseInt(singleValue);
+//                       if(firstTime)
+//                       {
+//                           maxValues.add(value);
+//                           minValues.add(value);
+//                       }
+//                       
+//                       else
+//                       {
+//                           if(value > maxValues.get(position))
+//                           {
+//                               maxValues.set(position, value);
+//                           }
+//                           
+//                           if(value< minValues.get(position))
+//                           {
+//                               minValues.set(position, value);
+//                           }
+//                       }
+//                       position++;
+//                }
+//               
+//               firstTime = false;
+//         }
+//           System.out.println("*********Min values");
+//           for(Integer min : minValues)
+//           {
+//               System.out.println("\t"+min);
+//           }
+//           System.out.println("********Max values");
+//           for(Integer max : maxValues)
+//           {
+//           System.out.println("\t"+max);
+//           }
+//       }
+//        
+//       
+//        Graph<Vertex,Edge> graph = initVertices(numberOfVertices, lines);
+//     
+//        int edgeID=0;
+//        for (Map.Entry<Integer, String[]> firstObject : map.entrySet()) 
+//        {
+//            for (Map.Entry<Integer, String[]> secondObject : map.entrySet()){
+//                
+//                  
+//                 ArrayList<Double> values1 = new ArrayList<>();
+//                 ArrayList<Double> values2 = new ArrayList<>();
+//                
+//                if(firstObject.getKey() != secondObject.getKey() && secondObject.getKey()>firstObject.getKey())
+//                {
+//                    int position1 = 0;
+//                    int position2= 0;
+//                    for(String singleValue : firstObject.getValue())
+//                    {
+//                        if(normalized)
+//                        {
+//                            double normalizedValue = (Double.parseDouble(singleValue)-minValues.get(position1))/(maxValues.get(position1)-minValues.get(position1));
+//                            values1.add(normalizedValue);
+//                        }
+//                        else
+//                            values1.add(Double.parseDouble(singleValue));
+//                        
+//                        position1++;
+//                    }
+//                    
+//                    for(String singleValue : secondObject.getValue())
+//                    {
+//                        if(normalized)
+//                        {
+//                            double normalizedValue = (Double.parseDouble(singleValue)-minValues.get(position2))/(maxValues.get(position2)-minValues.get(position2));
+//                            values2.add(normalizedValue);
+//                        }
+//                        else
+//                            values2.add(Double.parseDouble(singleValue));
+//                        
+//                        position2++;
+//                    }   
+//                    
+//                   
+//                    double distance = Distances.countDistance(distanceMethod, values1, values2);
+//         
+//                    if(distance>maxValue)
+//                    {
+//                        maxValue = distance;
+//                    }
+//                    
+//                    if(distance< Epsilon)
+//                    {
+//                        graph.addEdge(new Edge(edgeID), vertices[firstObject.getKey()], vertices[secondObject.getKey()]);
+//                        edgeID++;
+//                    }
+//                    
+//                   // Distances.countJaccard(values1, values2);
+//                    //System.out.println("Vzdialenost medzi "+firstObject.getKey()+" "+secondObject.getKey()+" je "+countEuclideanDistance(values1, values2));
+//                }
+//            }
+//        }
+//        
+//        UserSettings.maxSliderValue = maxValue;
+//        
+//        return graph;
+//    }
 }

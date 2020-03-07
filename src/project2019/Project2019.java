@@ -57,6 +57,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -93,6 +94,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -997,6 +999,8 @@ public class Project2019 extends Application {
 
     @Override
     public void start(Stage primaryStage) throws FileNotFoundException {
+          Rectangle2D screenBounds = Screen.getPrimary().getBounds();
+    System.out.println(screenBounds.getWidth()+ "x "+screenBounds.getHeight());
         copyOfPrimaryStage = primaryStage;
         Group root = new Group();
         Scene scene = new Scene(root, Design.sceneWidth, Design.sceneHeight/*Color.CADETBLUE*/);
@@ -1255,6 +1259,10 @@ public class Project2019 extends Application {
                     }
                         
                     
+                    //todo add button to table or something like that to decide what should be done with non-numeric property
+                    if(UserSettings.hasNonNumericProperty)
+                        AlertsWindows.displayNetworkHasNonNumericProperties(UserSettings.nonNumericPropertiesNames);
+                     
                    
                 }
             } catch (IOException ex) {

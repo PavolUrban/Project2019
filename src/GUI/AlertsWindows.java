@@ -5,6 +5,7 @@
  */
 package GUI;
 
+import java.util.List;
 import java.util.Optional;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
@@ -48,6 +49,26 @@ public class AlertsWindows {
     // ... user chose CANCEL or closed the dialog
         }
 
+    }
+    
+    public static void displayNetworkHasNonNumericProperties(List<String> nonNumericAttributes)
+    {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Upozornění");
+       
+        alert.setHeaderText("Při tvorbě sítě nebyly použity všechny vámi zvolené atributy");
+        
+        String alertText = "Seznam nenumerických atributů:\n";
+        
+        int index = 1;
+        for(String attribute : nonNumericAttributes)
+        {
+            alertText += index + ". " +  attribute+ "\n";
+            index++;
+        }
+        
+        alert.setContentText(alertText);
+        alert.showAndWait();
     }
     
     public static void displayAlert(String alertText) {
