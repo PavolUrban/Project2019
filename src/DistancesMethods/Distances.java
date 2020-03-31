@@ -58,6 +58,7 @@ public class Distances {
         return distance;
     }
     
+ 
     
     public static double countRBF(ArrayList<Double> values1, ArrayList<Double> values2)
     {
@@ -70,12 +71,11 @@ public class Distances {
         }
         
         //lambda = 1/2o^2 -- TODO o should be dynamically set now it is 1 by default
-       
-        double lambda = 1/(Math.pow(2*1, 2));
+       //double finalResult = Math.exp(- (sum / lambda));
+       //double lambda = 1/(Math.pow(2*1, 2));
         
-        double finalResult = Math.exp( - (sum / lambda));
         
-        System.out.println("Kernell trick e value is "+finalResult);
+       double finalResult = Math.exp(-1 * sum);
        
         return finalResult;
     }
