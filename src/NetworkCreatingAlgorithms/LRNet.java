@@ -34,8 +34,8 @@ public class LRNet
 {
     static double tolerance = 1e-6;
     
-    
-      public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+    //Comparator to sort Map by valu
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
         List<Entry<K, V>> list = new ArrayList<>(map.entrySet());
         list.sort(Entry.comparingByValue());
         
@@ -49,23 +49,20 @@ public class LRNet
         return result;
     }   
     
-    
-    
+   
     private int getLocalDegree(List<Double> objectSimilarities, int currentVertexIndex, Vertex v, List<Vertex> vertices)
     {
         int numberOfNeighbours = 0;
  
         List<Double> relevantSimilarities = new ArrayList();
         Map<Integer, Double> neighbours = new HashMap<>();
-        
-        
+             
         for(int i=0; i < objectSimilarities.size() ;i++)
         {    
-            //TODO it should have at least one neighbour!!
             if( ( i != currentVertexIndex ) && ( objectSimilarities.get(i) > tolerance ))
             {
                 relevantSimilarities.add(objectSimilarities.get(i));
-                neighbours.put(vertices.get(i).getId(), objectSimilarities.get(i));
+                neighbours.put(vertices.get(i).getIndexInVerticesArray(), objectSimilarities.get(i));
                 numberOfNeighbours++;
             }   
         }
@@ -98,6 +95,7 @@ public class LRNet
     {
         double diff = Math.abs(actual - expected);
         boolean areClose = false;
+        
         if (diff < tolerance) 
         {
             areClose = true;
@@ -129,8 +127,7 @@ public class LRNet
             v.setLocalRepresentativenes(lr);
             
             double kValue = lr * v.getLocalDegree();
-            kValue = Math.max(minNeighbours, (int) Math.round(kValue));
-            
+            kValue = Math.max(minNeighbours, (int) Math.round(kValue));    
             v.setKValue(kValue);
             
     
@@ -208,13 +205,16 @@ public class LRNet
         SparseGraph <Vertex, Edge> graph = new SparseGraph<>();
 
         //add vertices and get values from proper columns (attributes)
+        int index = 0;
         for(ChosenRecords cr : lines)
         {
             ArrayList<Double> values = cr.getAttributesValuesAsList();
             Vertex v = new Vertex(cr.getRecordId());
             v.setValuesOfProps(values);
+            v.setIndexInVerticesArray(index);
             vertices.add(v);
             graph.addVertex(v);
+            index++;
         }
         
         double[][] similarityMatrix = countSimilarityMatrix(vertices);
@@ -222,30 +222,17 @@ public class LRNet
         assignLocalSignificance(vertices);  
         setRepresentativeness(vertices, 1);
         
-//       
-        
-        
         int edgeId = 0;
         for(Vertex v :vertices)
         {
-            System.out.println(v.getLRNeighbours());
-           // System.out.println(v.getLocalDegree() + " and "+ v.getMaxSimilarity()+" and "+v.getLocalSignificance());
-           // System.out.println(v.getLocalRepresentativenes());
-            
-            
-            System.out.println("Pocet susedov "+v.getLRNeighbours().size());
-            System.out.println();
             for (Map.Entry<Integer, Double> neighbour : v.getLRNeighbours().entrySet())
             {
-                Edge e = new Edge(edgeId, neighbour.getValue()); //add weight
-                graph.addEdge(e, v, vertices.get(neighbour.getKey())); //TODO osetrit indexovanie
+                Edge e = new Edge(edgeId, neighbour.getValue());           
+                graph.addEdge(e, v, vertices.get(neighbour.getKey()));
                 edgeId++;
             }
-            
-         
         }
         
         return graph;
     }
-    
 }

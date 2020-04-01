@@ -36,6 +36,7 @@ public class Vertex {
     private int localDegree = 0;
     private double localRepresentativeness;
     private double KValue;
+    private int indexInVerticesArray;
     private Map<Integer, Double> LRneighbours = new HashMap();
     private List<Double> allSimilarities = new ArrayList();
     
@@ -72,6 +73,10 @@ public class Vertex {
         return this.allSimilarities;
     }
     
+    public int getIndexInVerticesArray()
+    {
+        return this.indexInVerticesArray;
+    }
     
     public int getLocalDegree()
     {
@@ -144,6 +149,10 @@ public class Vertex {
         this.localSignificance = localSignificance;
     }
     
+    public void setIndexInVerticesArray(int index)
+    {
+        this.indexInVerticesArray = index;
+    }
     
     public void setAllSimilarities(List<Double> similarities)
     {

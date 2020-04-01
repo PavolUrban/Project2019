@@ -54,16 +54,9 @@ public class DataPreparationToNetwork {
         {
             if(methodOfNetworkCreation == 0 )
             {
-                
-                
-
                 //Todo vyriesit normalizaciu
-                //EpsilonNew en = new EpsilonNew();
-                //network = en.createEpsilonNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), distanceMethod, Epsilon);
-                LRNet lrnet = new LRNet();
-                network = lrnet.createLRNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), Epsilon);
-               
-            
+                EpsilonNew en = new EpsilonNew();
+                network = en.createEpsilonNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), distanceMethod, Epsilon);
             }
             else if(methodOfNetworkCreation == 1)
             {
@@ -87,6 +80,12 @@ public class DataPreparationToNetwork {
                 network = eknn.createNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized),distanceMethod, Epsilon, Integer.parseInt(kValue));
                 
                 //System.out.println("combinated mame na epsilon " +Epsilon+" ,KNN: "+ kValue);
+            }
+            
+            else if(methodOfNetworkCreation == 4)
+            {
+                LRNet lrnet = new LRNet();
+                network = lrnet.createLRNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), Epsilon);
             }
             
         }

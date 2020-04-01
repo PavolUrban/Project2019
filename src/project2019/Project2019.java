@@ -165,7 +165,7 @@ public class Project2019 extends Application {
     
     Label labelForSlider = new Label("Hodnota ε:");
     ChoiceBox choicesNetworkMethodCreation = new ChoiceBox(FXCollections.observableArrayList(
-    "ε-okolí ", "KNN", "Nejvýznamnejší hrany", "Kombinace ε-okolí a KNN")
+    "ε-okolí ", "KNN", "Nejvýznamnejší hrany", "Kombinace ε-okolí a KNN", "LRNet")
     );
     
      ChoiceBox choicesMetrics = new ChoiceBox(FXCollections.observableArrayList(
@@ -1029,6 +1029,7 @@ public class Project2019 extends Application {
         primaryStage.setHeight(Design.sceneHeight);
   
         //filters
+  
         List<String> filterValues = SeparateDataIntoRelatedSections.getAllPosibleValuesForFilter(HeadersIndexes.indexOfYearColumn);   
         final ChoiceBox choicesYears = createChoiceBox(filterByYearText, filterValues);
         year = Integer.parseInt(filterValues.get(0));
@@ -1076,7 +1077,7 @@ public class Project2019 extends Application {
 
         eatingHabbits =  somethin("Stravovací návyky", 6,21, null);
         
-        
+      
         choicesNetworkMethodCreation.getSelectionModel().selectFirst();
         choicesEmptyRecords.getSelectionModel().selectLast();
         choicesMetrics.getSelectionModel().selectFirst();
@@ -1322,7 +1323,9 @@ public class Project2019 extends Application {
         vbox.setSpacing(5);
         
         vbox.setPadding(new Insets(30, 0, 0, Design.canvasWidth + 50)); //TODO dynamicky posledne bolo 930
-        vbox.getChildren().addAll(filtersGridTitlePane, eatingHabbits, createTable(table, 1),HBOXNetworkCreation,slider, HBOXNetworkCreationParams, HBoxNetworkCreationParams,box,separatorTest, buttonCreateNetwork, numberOfVertices, numberOfEdges, numberOfComponents, chosenLayout);//HBOxPhysical
+        
+        
+        vbox.getChildren().addAll(filtersGridTitlePane, eatingHabbits,createTable(table, 1),HBOXNetworkCreation,slider, HBOXNetworkCreationParams, HBoxNetworkCreationParams,box,separatorTest, buttonCreateNetwork, numberOfVertices, numberOfEdges, numberOfComponents, chosenLayout);//HBOxPhysical
    
         root.getChildren().addAll(vbox);
         
