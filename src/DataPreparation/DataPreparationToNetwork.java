@@ -13,6 +13,7 @@ import NetworkCreatingAlgorithms.EpsilonKNNCombinated;
 import NetworkCreatingAlgorithms.EpsilonNeighbourhoodGraph;
 import NetworkCreatingAlgorithms.EpsilonNew;
 import NetworkCreatingAlgorithms.KNearestNeighbor;
+import NetworkCreatingAlgorithms.LRNet;
 import NetworkCreatingAlgorithms.NetworkByTopEdges;
 import UserSettings.ToMove;
 import UserSettings.UserSettings;
@@ -53,12 +54,16 @@ public class DataPreparationToNetwork {
         {
             if(methodOfNetworkCreation == 0 )
             {
+                
+                
+
                 //Todo vyriesit normalizaciu
-                EpsilonNew en = new EpsilonNew();
-                network = en.createEpsilonNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), distanceMethod, Epsilon);
-//                System.out.println("Creating epsilon");
-//                EpsilonNeighbourhoodGraph eng = new EpsilonNeighbourhoodGraph();
-//                network = eng.createNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod),Epsilon, distanceMethod, normalized); 
+                //EpsilonNew en = new EpsilonNew();
+                //network = en.createEpsilonNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), distanceMethod, Epsilon);
+                LRNet lrnet = new LRNet();
+                network = lrnet.createLRNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), Epsilon);
+               
+            
             }
             else if(methodOfNetworkCreation == 1)
             {

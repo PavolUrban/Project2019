@@ -6,15 +6,25 @@
 package NetworkCreatingAlgorithms;
 
 import DataPreparation.ChosenRecords;
+import DistancesMethods.Distances;
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
+import UserSettings.UserSettings;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseGraph;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 /**
  *
@@ -22,128 +32,220 @@ import java.util.Map;
  */
 public class LRNet 
 {
+    static double tolerance = 1e-6;
     
-    public Graph<Vertex, Edge> createLRNetwork(List<ChosenRecords> lines, double epsilon) throws FileNotFoundException
-    {         
-        Map<Integer, ArrayList<Double>> map = new HashMap<Integer, ArrayList<Double>>();       
-       
-        int numberOfVertices = 0;
-        List<Vertex> vertices = new ArrayList<>();
+    
+      public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+        List<Entry<K, V>> list = new ArrayList<>(map.entrySet());
+        list.sort(Entry.comparingByValue());
         
+        Collections.reverse(list);
         
-        //get all values 
-        for(ChosenRecords cr : lines)
-        {
-            ArrayList<Double> values = cr.getAttributesValuesAsList();
-            map.put(cr.getRecordId(), values);
-            numberOfVertices++;
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
         }
+
+        return result;
+    }   
+    
+    
+    
+    private int getLocalDegree(List<Double> objectSimilarities, int currentVertexIndex, Vertex v, List<Vertex> vertices)
+    {
+        int numberOfNeighbours = 0;
+ 
+        List<Double> relevantSimilarities = new ArrayList();
+        Map<Integer, Double> neighbours = new HashMap<>();
         
-        //init vertices - in constructor vertices are created with significance = 0
-        SparseGraph <Vertex, Edge> graph = new SparseGraph<>();
         
-        
-        for(int i = 0; i < numberOfVertices; i++)
-        {
-            Vertex v = new Vertex(lines.get(i).getRecordId());
-            vertices.add(v);
-        }
-     
-        
-        int currentVertexIndex = 0;
-        for (Map.Entry<Integer, ArrayList<Double>> firstObject : map.entrySet()) 
-        {         
-            int numberOfNeighbours = 0;
-            double distanceOfNearestNeighbour = 500;
-            List<Integer> idsOfNearestNeighbours = new ArrayList<Integer>();
-            
-            
-            int neighbourVertexIndex = 0;
-            
-            for (Map.Entry<Integer, ArrayList<Double>> secondObject : map.entrySet())
+        for(int i=0; i < objectSimilarities.size() ;i++)
+        {    
+            //TODO it should have at least one neighbour!!
+            if( ( i != currentVertexIndex ) && ( objectSimilarities.get(i) > tolerance ))
             {
-                boolean verticesAreNeighbours = false;                
-               
-                if(firstObject.getKey() !=  secondObject.getKey())
-                {
-                    double distance = countEuclideanDistance(firstObject.getValue(), secondObject.getValue());
-                    
-                    if(distance <= epsilon)
-                    {
-                         verticesAreNeighbours = true;
-                         numberOfNeighbours++;
-                         
-                         if(distance < distanceOfNearestNeighbour)
-                         {
-                             idsOfNearestNeighbours.clear();
-                             idsOfNearestNeighbours.add(neighbourVertexIndex);
-                         }
-                         
-                         else if(distance == distanceOfNearestNeighbour)
-                         {
-                             idsOfNearestNeighbours.add(neighbourVertexIndex);
-                         }
-                    }
-                       
-                    
-                }
-                
-                
-                neighbourVertexIndex++;
+                relevantSimilarities.add(objectSimilarities.get(i));
+                neighbours.put(vertices.get(i).getId(), objectSimilarities.get(i));
+                numberOfNeighbours++;
             }   
-            
-            
-            //update local significance
-            for(int id : idsOfNearestNeighbours)
-            {
-               Vertex v = vertices.get(id);
-               v.setSignificanceLRNet(v.getSignificanceLRNet() + 1);
-            }
-            
-            //update number of neighbours
-            Vertex currentVertex = vertices.get(currentVertexIndex);
-            currentVertex.setNumberOfNeighbours(numberOfNeighbours);
-         
-            
-            currentVertexIndex++;
-            
-            
         }
         
+        Map<Integer, Double> allNeighbours = sortByValue(neighbours);
+        v.setLRNeighbours(allNeighbours);
         
-//        for(Vertex v : vertices)
-//        {
-//            System.out.println("Vertex "+ v.getId()+ " number of neighbours: "+ v.getNumberOfNeighbours() + ", localSignificance "+v.getSignificanceLRNet());
-//            graph.addVertex(v);
-//        }
+        UserSettings.maxSimilarities.add(Collections.max(relevantSimilarities));
         
+        return numberOfNeighbours;
+    }
+    
+    
+    private void assignLocalDegree(List<Vertex> vertices, double[][] similarityMatrix)
+    {
+        int vertexIndex=0;
         
         for(Vertex v : vertices)
         {
-            if(v.getSignificanceLRNet()>0)
-            {
-            }
+            List<Double> similarityValues = DoubleStream.of(similarityMatrix[vertexIndex]).boxed().collect(Collectors.toList());
+            v.setAllSimilarities(similarityValues);
+            v.setLocalDegree(getLocalDegree(similarityValues, vertexIndex, v, vertices));
+            vertexIndex++;
         }
-        
-        return null;
+    
     }
-
-
-    public double countEuclideanDistance( ArrayList<Double> values1,  ArrayList<Double> values2)
+    
+    
+    private static boolean objectsAreClose(double actual, double expected)
     {
-        double sum = 0.0;
-        for (int x=0; x<values1.size(); x++)//nezacinam 0 aby sa ignoroval prvy riadok - premysliet
+        double diff = Math.abs(actual - expected);
+        boolean areClose = false;
+        if (diff < tolerance) 
         {
-            sum += Math.pow(values1.get(x)-values2.get(x),2);
+            areClose = true;
         }
-
-        double result = Math.sqrt(sum);
         
-        return result;
+        return areClose;
     }
     
     
+   
+    private void setRepresentativeness(List<Vertex> vertices, int minNeighbours)
+    {
+        for(Vertex v : vertices)
+        {   
+             //x-representativeness base
+            double b = 0;
+           
+            //local representativeness
+            double lr = 0.0;
+            
+            if(v.getLocalSignificance() > 0)
+            {
+                double exponent = 1.0 / v.getLocalSignificance();
+                b = Math.pow( ( 1 + v.getLocalDegree() ), exponent);
+                
+                lr = 1.0 / b;
+            }
+            
+            v.setLocalRepresentativenes(lr);
+            
+            double kValue = lr * v.getLocalDegree();
+            kValue = Math.max(minNeighbours, (int) Math.round(kValue));
+            
+            v.setKValue(kValue);
+            
+    
+            Map<Integer, Double> finalNeighbours = new HashMap();
+            int maxNeighbours = 0;
+            double last=-75;// TODO doriesit last
+            for (Map.Entry<Integer, Double> neighbour : v.getLRNeighbours().entrySet())
+            {
+                //if(objectsAreClose(neighbour.getValue(), kValue))
+                if(maxNeighbours < kValue)
+                {
+                    last = neighbour.getValue();
+                    finalNeighbours.put(neighbour.getKey(), neighbour.getValue());
+                }
+                else
+                    break;
+                maxNeighbours++;
+            }
+            
+            
+            v.setLRNeighbours(finalNeighbours);
+        }
+        
+    }
     
     
+    private void assignLocalSignificance(List<Vertex>vertices)
+    {
+        
+        for(int i=0; i < vertices.size(); i++)
+        {
+            List<Double> allVertexSimilarities = vertices.get(i).getAllSimilarities();
+            int localSignigicance = 0;
+            for(int j=0; j< UserSettings.maxSimilarities.size(); j++)
+            {              
+                if(objectsAreClose(UserSettings.maxSimilarities.get(j), allVertexSimilarities.get(j)) && (i!=j))
+                    localSignigicance++;
+            }
+            
+            vertices.get(i).setLocalSignificance(localSignigicance);
+        }
+    }
+    
+    
+   
+    private double[][] countSimilarityMatrix(List<Vertex> vertices)
+    {
+        double similarityMatrix[][] = new double[vertices.size()][vertices.size()];
+        
+        int indexV1 = 0;
+        for(Vertex v1 : vertices)
+        {
+            int indexV2 = 0;
+            for(Vertex v2 : vertices)
+            {
+                similarityMatrix[indexV1][indexV2] = Distances.countRBF(v1.getValuesOfProps(), v2.getValuesOfProps());
+                indexV2++;
+            }
+           
+            indexV1++;            
+        }
+        
+        return similarityMatrix;
+    }
+    
+    
+    //add parameter min neighbours
+    public Graph<Vertex, Edge> createLRNetwork(List<ChosenRecords> lines, double epsilon) throws FileNotFoundException
+    {         
+        //to avoid out of bounds exception when network is created repeatedly by LRNet method
+        UserSettings.maxSimilarities.clear();
+        
+        System.out.println("Counting LRNET");
+        List<Vertex> vertices = new ArrayList<>(); 
+        SparseGraph <Vertex, Edge> graph = new SparseGraph<>();
+
+        //add vertices and get values from proper columns (attributes)
+        for(ChosenRecords cr : lines)
+        {
+            ArrayList<Double> values = cr.getAttributesValuesAsList();
+            Vertex v = new Vertex(cr.getRecordId());
+            v.setValuesOfProps(values);
+            vertices.add(v);
+            graph.addVertex(v);
+        }
+        
+        double[][] similarityMatrix = countSimilarityMatrix(vertices);
+        assignLocalDegree(vertices, similarityMatrix);
+        assignLocalSignificance(vertices);  
+        setRepresentativeness(vertices, 1);
+        
+//       
+        
+        
+        int edgeId = 0;
+        for(Vertex v :vertices)
+        {
+            System.out.println(v.getLRNeighbours());
+           // System.out.println(v.getLocalDegree() + " and "+ v.getMaxSimilarity()+" and "+v.getLocalSignificance());
+           // System.out.println(v.getLocalRepresentativenes());
+            
+            
+            System.out.println("Pocet susedov "+v.getLRNeighbours().size());
+            System.out.println();
+            for (Map.Entry<Integer, Double> neighbour : v.getLRNeighbours().entrySet())
+            {
+                Edge e = new Edge(edgeId, neighbour.getValue()); //add weight
+                graph.addEdge(e, v, vertices.get(neighbour.getKey())); //TODO osetrit indexovanie
+                edgeId++;
+            }
+            
+         
+        }
+        
+        return graph;
+    }
     
 }

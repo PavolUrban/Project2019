@@ -36,4 +36,8 @@ public class UserSettings {
     public static String pathToDataset = "C:\\A11.csv";
     public static boolean hasHeader = true;
     
+    
+    //max-similarities for LRNET
+    public static List<Double> maxSimilarities = new ArrayList();
+    
 }

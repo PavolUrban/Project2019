@@ -7,6 +7,9 @@ package NetworkComponents;
 
 import GUI.Design;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -29,8 +32,12 @@ public class Vertex {
     public int clusterId = 0;
     
     //props for LRNet
-    private int significanceLRNet = 0;
-    private int numberOfNeighbours = 0;
+    private int localSignificance = 0;
+    private int localDegree = 0;
+    private double localRepresentativeness;
+    private double KValue;
+    private Map<Integer, Double> LRneighbours = new HashMap();
+    private List<Double> allSimilarities = new ArrayList();
     
     private double revValue = -1;
     private String revChange = "";
@@ -58,6 +65,32 @@ public class Vertex {
 
     public int getId() {
         return id;
+    }
+    
+    public List<Double> getAllSimilarities()
+    {
+        return this.allSimilarities;
+    }
+    
+    
+    public int getLocalDegree()
+    {
+        return this.localDegree;
+    }
+    
+    public Map<Integer, Double> getLRNeighbours()
+    {
+        return this.LRneighbours;
+    }
+    
+    public double getLocalRepresentativenes()
+    {
+        return this.localRepresentativeness;
+    }
+    
+    public int getLocalSignificance()
+    {
+        return this.localSignificance;
     }
 
     public String getLabel() {
@@ -96,14 +129,25 @@ public class Vertex {
         this.size = size;
     }
     
-    public void setSignificanceLRNet(int significance)
+    public void setKValue(double kValue)
     {
-        this.significanceLRNet = significance;
+        this.KValue = kValue;
     }
     
-    public void setNumberOfNeighbours(int numberOfNeighbours)
+    public void setLocalDegree(int localDegree)
     {
-        this.numberOfNeighbours = numberOfNeighbours;
+        this.localDegree = localDegree;
+    }
+    
+    public void setLocalSignificance(int localSignificance)
+    {
+        this.localSignificance = localSignificance;
+    }
+    
+    
+    public void setAllSimilarities(List<Double> similarities)
+    {
+        this.allSimilarities = similarities;
     }
     
     
@@ -132,20 +176,26 @@ public class Vertex {
         this.isVisited = visited;
     }
     
+    public void setLocalRepresentativenes(double localRepresentativenes)
+    {
+        this.localRepresentativeness = localRepresentativenes;
+    }
+    
+    public void setLRNeighbours(Map<Integer, Double> neighbours)
+    {
+        this.LRneighbours = neighbours;
+    }
+    
     public Boolean getisVisited()
     {
         
         return this.isVisited;
     }
     
-    public int getSignificanceLRNet()
-    {
-        return significanceLRNet;
-    }
     
-    public int getNumberOfNeighbours()
+    public double getKValue()
     {
-        return numberOfNeighbours;
+        return this.KValue;
     }
     
     public ArrayList<Double> getValuesOfProps()
