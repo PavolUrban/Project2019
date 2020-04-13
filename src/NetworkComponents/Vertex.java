@@ -139,6 +139,11 @@ public class Vertex {
         this.KValue = kValue;
     }
     
+    public void setClusterId(int clusterId)
+    {
+        this.clusterId = clusterId;
+    }
+    
     public void setLocalDegree(int localDegree)
     {
         this.localDegree = localDegree;

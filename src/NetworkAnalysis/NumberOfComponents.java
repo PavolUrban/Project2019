@@ -7,6 +7,7 @@ package NetworkAnalysis;
 
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
+import UserSettings.UserSettings;
 import edu.uci.ics.jung.algorithms.cluster.WeakComponentClusterer;
 import edu.uci.ics.jung.algorithms.scoring.ClosenessCentrality;
 import edu.uci.ics.jung.graph.Graph;
@@ -31,21 +32,24 @@ public class NumberOfComponents {
     
     public int getNumberOfComponents()
     {
-   
+        
         WeakComponentClusterer wcc = new WeakComponentClusterer();
         Set<Set<Vertex>> ll = wcc.transform(network);
         
-        int counter = 0;
-        for(Set<Vertex> test : ll)
+        if(UserSettings.colorizeByAttribute.equalsIgnoreCase("Podľa príslušnosti ku komponente"))
         {
-            for(Vertex v : test)
+            int counter = 0;
+            for(Set<Vertex> test : ll)
             {
-                v.clusterId = counter;
-            }
+                for(Vertex v : test)
+                {
+                    v.clusterId = counter;
+                    System.out.println(v.clusterId);
+                }
             
             counter++;
+            }
         }
-        
         
         return ll.size();
     }

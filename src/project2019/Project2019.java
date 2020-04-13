@@ -176,6 +176,10 @@ public class Project2019 extends Application {
         "Doplnit medián","Doplnit průměr","Smazat záznam")
     );
      
+     ChoiceBox choicesColorizeByAttribute = new ChoiceBox(FXCollections.observableArrayList(
+        "Žiadne","Podľa príslušnosti ku komponente")
+    );
+     
     CheckBox checkboxNormalization = new CheckBox(); 
     CheckBox checkboxSaveLayout = new CheckBox();
     
@@ -1077,6 +1081,7 @@ public class Project2019 extends Application {
 
         eatingHabbits =  somethin("Stravovací návyky", 6,21, null);
         
+        choicesColorizeByAttribute.getSelectionModel().selectFirst();
       
         choicesNetworkMethodCreation.getSelectionModel().selectFirst();
         choicesEmptyRecords.getSelectionModel().selectLast();
@@ -1143,8 +1148,31 @@ public class Project2019 extends Application {
                 sliderValue.setDisable(false);
             }
 
+            //TODO disable LRNET knn props and so ons
         }
     });
+       
+        
+        
+        
+        //colorization of vertices choices
+        choicesColorizeByAttribute.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+        @Override
+        public void changed(ObservableValue<? extends Number> observable,
+            Number oldVal, Number newVal) {
+            
+            int position = observable.getValue().intValue();
+            UserSettings.colorizeByAttribute = choicesColorizeByAttribute.getItems().get(position).toString();
+            
+            }
+        });
+        
+        
+        
+        
+        
+        
+        
         
         
          checkboxNormalization.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -1316,16 +1344,22 @@ public class Project2019 extends Application {
         
         HBOXNetworkCreationParams.getChildren().addAll(labelKNNRelated, textFieldKNN, labelTopEdges , textFieldTopEdges);
         
+        
+        final HBox HBOXNetworkParamsColorize = new HBox();
+        HBOXNetworkParamsColorize.setSpacing(5);
+        Label labelColorize = new Label("Zafarbiť podľa");
    
       
-       
+       HBOXNetworkParamsColorize.getChildren().addAll(labelColorize, choicesColorizeByAttribute);
+        
+        
         vbox = new VBox();
         vbox.setSpacing(5);
         
         vbox.setPadding(new Insets(30, 0, 0, Design.canvasWidth + 50)); //TODO dynamicky posledne bolo 930
         
         
-        vbox.getChildren().addAll(filtersGridTitlePane, eatingHabbits,createTable(table, 1),HBOXNetworkCreation,slider, HBOXNetworkCreationParams, HBoxNetworkCreationParams,box,separatorTest, buttonCreateNetwork, numberOfVertices, numberOfEdges, numberOfComponents, chosenLayout);//HBOxPhysical
+        vbox.getChildren().addAll(filtersGridTitlePane, eatingHabbits,createTable(table, 1),HBOXNetworkCreation,slider, HBOXNetworkCreationParams, HBoxNetworkCreationParams,box,separatorTest,HBOXNetworkParamsColorize, buttonCreateNetwork, numberOfVertices, numberOfEdges, numberOfComponents, chosenLayout);//HBOxPhysical
    
         root.getChildren().addAll(vbox);
         

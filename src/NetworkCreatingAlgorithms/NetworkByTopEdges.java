@@ -9,6 +9,7 @@ import DataPreparation.ChosenRecords;
 import DistancesMethods.Distances;
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
+import UserSettings.UserSettings;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseGraph;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class NetworkByTopEdges {
             ArrayList<Double> values = cr.getAttributesValuesAsList();
             
             Vertex v = new Vertex(cr.getRecordId());
+            v.setClusterId(UserSettings.mapAliasingForColorization.get(cr.getClassName()));
             v.setValuesOfProps(values);
             vertices.add(v);
             graph.addVertex(v);

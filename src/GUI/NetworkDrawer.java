@@ -24,10 +24,10 @@ import javafx.scene.paint.Color;
  */
 public class NetworkDrawer {
     
-    static List<Color> colors = new ArrayList(Arrays.asList(Color.CORAL, Color.CHARTREUSE, Color.BROWN, Color.BLUE, Color.BURLYWOOD,
-                                                     Color.DARKSEAGREEN, Color.SILVER, Color.AQUA, Color.YELLOW, Color.BLUEVIOLET,
+    static List<Color> colors = new ArrayList(Arrays.asList(Color.CORAL, Color.AQUA,Color.SPRINGGREEN,Color.YELLOW , Color.BURLYWOOD,
+                                                     Color.DARKSEAGREEN, Color.SILVER,Color.CHARTREUSE,Color.BLUE , Color.BLUEVIOLET,
                                                      Color.CADETBLUE, Color.FUCHSIA, Color.DARKORANGE, Color.KHAKI,Color.PINK,
-                                                     Color.ROSYBROWN, Color.SPRINGGREEN, Color.BLACK));
+                                                     Color.ROSYBROWN,Color.BROWN,  Color.BLACK));
     
     
      private static void drawEdge(GraphicsContext gc, double fromX, double fromY, double toX, double toY, double edgeWidth, Color color) {
@@ -152,6 +152,7 @@ public class NetworkDrawer {
                    
         for (Vertex v : network.getVertices()) 
         {
+            
              if(v.clusterId > colors.size() - 1) // - 1 because of indexing
                 drawVertex(gc, v, Color.CORAL, true); //skontrolovat ci je spravne
             

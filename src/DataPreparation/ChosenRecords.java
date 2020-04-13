@@ -16,12 +16,21 @@ public class ChosenRecords {
     
     int id;
     ArrayList<Double> attributesValues;
+    String className;
+    List<Integer> emptyPropertiesIndexes;
+    
     
     public ChosenRecords(int id)
     {
         this.id = id;
         this.attributesValues = new ArrayList();
-        
+        this.emptyPropertiesIndexes = new ArrayList<>();
+    }
+ 
+    
+    public String getClassName()
+    {
+        return this.className;
     }
     
     public ArrayList<Double> getAttributesValuesAsList()

@@ -10,7 +10,9 @@ import NetworkComponents.Vertex;
 import edu.uci.ics.jung.graph.Graph;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -21,6 +23,11 @@ public class UserSettings {
     //default settings 
     public static String distanceMethod = "Euclidean distance";
     public static String emptyColumnsAction = "Remove records";
+   
+    //attributes for vertices colorization
+    public static String colorizeByAttribute = "Žiadne";
+    public static Map<String, Integer> mapAliasingForColorization = new HashMap<>();
+    
     
     public static Collection<Vertex> listOfSavedVertices;
     public static Graph<Vertex, Edge> savedNetwork = null;

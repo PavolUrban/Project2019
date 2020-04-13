@@ -211,6 +211,7 @@ public class LRNet
             ArrayList<Double> values = cr.getAttributesValuesAsList();
             Vertex v = new Vertex(cr.getRecordId());
             v.setValuesOfProps(values);
+            v.setClusterId(UserSettings.mapAliasingForColorization.get(cr.getClassName()));
             v.setIndexInVerticesArray(index);
             vertices.add(v);
             graph.addVertex(v);

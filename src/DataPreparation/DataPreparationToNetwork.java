@@ -25,7 +25,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.scene.control.Alert;
 
 /**
@@ -226,10 +228,15 @@ public class DataPreparationToNetwork {
         //restart non-numeric properties
         UserSettings.hasNonNumericProperty = false;
         UserSettings.nonNumericPropertiesNames.clear();
+        UserSettings.mapAliasingForColorization.clear();
+        
         
         ToMove.headers = headers;
         List<ChosenRecords> chosenRecords = new ArrayList();
         int id = 0;
+        
+        //for vertices colorization
+        int aliasingIndex = 0;
         
         for(String line : lines)
         {
@@ -257,7 +264,8 @@ public class DataPreparationToNetwork {
                 if(array[h.getId()].equalsIgnoreCase("") || array[h.getId()]==null || array[h.getId()].isEmpty()) 
                 {
                     hasEmptyProperty = true;
-                    break;
+                    cr.emptyPropertiesIndexes.add(h.getId());
+                    //break;
                 }           
                 
                 else
@@ -282,6 +290,15 @@ public class DataPreparationToNetwork {
             //add only records with complete set of list - todo add median or something like that
             if(!hasEmptyProperty)
             {
+                //TODO add class name dynamically 
+                cr.className = array[4];
+                
+                if(!UserSettings.mapAliasingForColorization.containsKey(cr.className))
+                {
+                    UserSettings.mapAliasingForColorization.put(cr.className, aliasingIndex);
+                    aliasingIndex++;
+                }
+                
                 chosenRecords.add(cr);
             }
             
@@ -295,6 +312,7 @@ public class DataPreparationToNetwork {
             doNormalization(chosenRecords);
             System.out.println("Normalization done");
         }
+        
         
         return chosenRecords;
     }
@@ -351,6 +369,49 @@ public class DataPreparationToNetwork {
     }
     
     
+    //TODO
+    public static void getMedianValues()
+    {
+    
+    }
+    
+    public static void getAvgValues(Map<Integer, Double> columnValuesMap, int numberOfRecords)
+    {
+        System.out.println("Before");
+        System.out.println(columnValuesMap);
+        for (int value : columnValuesMap.keySet())  
+        {
+            
+            columnValuesMap.put(value, columnValuesMap.get(value)/numberOfRecords);
+        }
+        System.out.println("after");
+        System.out.println(columnValuesMap);
+    }
+    
+    
+    
+    //todo - it is not enough to iterate chosenRecords, it must be iterated over full List<String> lines .. empty values can be in different columns
+    public static Map<Integer, Double> getSumValuesForNonEmptyColumns(List<ChosenRecords> chosenRecordsWithEmptyProperty)
+    {
+        Map<Integer, Double> columnValuesMap = new HashMap();
+        
+        for(ChosenRecords singleRecord : chosenRecordsWithEmptyProperty)
+        {
+            for(int i=0; i < singleRecord.attributesValues.size(); i++)
+            {
+                if(!columnValuesMap.containsKey(i))
+                    columnValuesMap.put(i, singleRecord.attributesValues.get(i));
+                
+                else
+                    columnValuesMap.put(i, columnValuesMap.get(i) + singleRecord.attributesValues.get(i));
+            }
+        }
+        
+        return columnValuesMap;
+    }
+    
+    
+    
     public static boolean isDouble(String value) {
     try {
         Double.parseDouble(value);
@@ -358,6 +419,9 @@ public class DataPreparationToNetwork {
     } catch (NumberFormatException e) {
         return false;
     }
+    
+    
+    
 }
     
    

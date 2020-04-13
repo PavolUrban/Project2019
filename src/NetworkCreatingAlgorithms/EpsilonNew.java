@@ -30,12 +30,12 @@ public class EpsilonNew {
         //add vertices and get values from proper columns (attributes)
         for(ChosenRecords cr : lines)
         {
-            ArrayList<Double> values = cr.getAttributesValuesAsList();
-            
+            ArrayList<Double> values = cr.getAttributesValuesAsList();   
             Vertex v = new Vertex(cr.getRecordId());
             v.setValuesOfProps(values);
-            
-            System.out.println(values);
+            v.setClusterId(UserSettings.mapAliasingForColorization.get(cr.getClassName()));
+//            System.out.println(cr.getClassName() +" vs "+ v.clusterId);
+//            System.out.println(values);
             vertices.add(v);
             graph.addVertex(v);
         }
