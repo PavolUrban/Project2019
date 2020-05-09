@@ -25,19 +25,24 @@ public class SimpleNetworkProperties {
      
      public void getNetworkDensity(Graph<Vertex, Edge> network)
      {
-         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Network density");
-        alert.setHeaderText("Network density value is: ");
-        
-         NetworkDensity n = new NetworkDensity(network);
-         n.count();
-        
          
-           DecimalFormat df = new DecimalFormat("#.######");
-        String valueDensity = df.format(n.getScores());
-        alert.setContentText(valueDensity);
+        if(network != null)
+        {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Network density");
+            alert.setHeaderText("Network density value is: ");
 
-        alert.showAndWait();
+            NetworkDensity n = new NetworkDensity(network);
+            n.count();
+
+            DecimalFormat df = new DecimalFormat("#.######");
+            String valueDensity = df.format(n.getScores());
+            alert.setContentText(valueDensity);
+
+            alert.showAndWait();
+        }
+        else
+            AlertsWindows.displayAlert("Na výpočet hustoty siete musí byť vytvorená sieť.");
      }
      
     
@@ -58,30 +63,57 @@ public class SimpleNetworkProperties {
      }
      
      
+    public void getClusteringCoefficient(Graph<Vertex, Edge> network)
+    {
+        if(network != null)
+        {
+            ClusteringCoefficients cc = new ClusteringCoefficients(network);
+            cc.count();
+        }
+        
+        else
+            AlertsWindows.displayAlert("Na výpočet zhlukovacieho koeficientu musí byť vytvorená sieť.");
+            
+    }
+     
+
+     
      public void getAverageDegree(Graph<Vertex, Edge> network)
      {
-          Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Average degree");
-        alert.setHeaderText("Average degree value is: ");
+        if(network != null)
+        {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Average degree");
+            alert.setHeaderText("Average degree value is: ");
         
-         AverageDegree ad= new AverageDegree(network);
-         ad.count();
-         String valueAverage = String.valueOf(ad.getAverageDegree());
-        alert.setContentText(valueAverage);
-
-        alert.showAndWait();
+            AverageDegree ad= new AverageDegree(network);
+            ad.count();
+            String valueAverage = String.valueOf(ad.getAverageDegree());
+            alert.setContentText(valueAverage);
+            
+            alert.showAndWait();
+        }
+        
+        else
+            AlertsWindows.displayAlert("Na výpočet priemerného stupňa musí byť vytvorená sieť.");
      }
      
      
-      public void getDiameter(Graph<Vertex, Edge> network)
-     {
-          myAlert = new Alert(Alert.AlertType.INFORMATION);
-        myAlert.setTitle("Diameter");
-        myAlert.setHeaderText("Diameter value is counting right now, wait please.");
-         startTask(network, "Diameter");
+    public void getDiameter(Graph<Vertex, Edge> network)
+    {
+        if(network != null)
+        {
+            myAlert = new Alert(Alert.AlertType.INFORMATION);
+            myAlert.setTitle("Diameter");
+            myAlert.setHeaderText("Diameter value is counting right now, wait please.");
+            startTask(network, "Diameter");
         
-
             myAlert.showAndWait();
+        }
+        
+        else
+            AlertsWindows.displayAlert("Na výpočet priemeu siete musí byť vytvorená sieť.");
+    
      }
      
       

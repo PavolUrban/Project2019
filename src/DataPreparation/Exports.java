@@ -31,7 +31,7 @@ public class Exports
          
         if(network == null)
         {
-            AlertsWindows.displayAlert("No network to save.");
+            AlertsWindows.displayAlert("Žiadna sieť na uloženie");
         }
         
         else
@@ -126,15 +126,21 @@ public class Exports
                     fw = new FileWriter(file, true); 
                     
                     List<Headers> headers = ToMove.headers;
+                    
+                    int numberOfAddedHeaders = 0;
                     for(Headers h : headers)
                     {
-                       fw.write(h.getHeaderName()+",");
+                        if(numberOfAddedHeaders == headers.size() - 1)
+                            fw.write(h.getHeaderName()+"\n");
+                        else
+                            fw.write(h.getHeaderName()+",");
+                        
+                       numberOfAddedHeaders++;
                     }
-                    fw.write("\n");
                     
-                    
-                    
+                   
                     List<ChosenRecords> cr = ToMove.chosenRecords;
+                   
                     for(ChosenRecords c : cr)
                     {
                         fw.write(c.attributesValues+"\n");    

@@ -318,7 +318,7 @@ public class DataPreparationToNetwork {
             System.out.println("Normalization done");
         }
         
-        
+        ToMove.chosenRecords = chosenRecords;
         return chosenRecords;
     }
     

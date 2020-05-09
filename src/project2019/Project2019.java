@@ -190,8 +190,8 @@ public class Project2019 extends Application {
     CheckBox checkboxNormalization = new CheckBox(); 
     CheckBox checkboxSaveLayout = new CheckBox();
     
-    HBox box = new HBox( 5.0, new Label("Normalizovať data"), checkboxNormalization, new Label("Zachovať layout"), checkboxSaveLayout);
-   
+    CheckBox checkboxDrawNetwork = new CheckBox();
+    
     
     Boolean saveLayout = true;
     final Separator separator = new Separator();
@@ -279,9 +279,7 @@ public class Project2019 extends Application {
         grid.add(labelHeader, 0, 3);
         grid.add(choiceBoxHeader, 1, 3);
       
-        
         grid.setAlignment(Pos.CENTER);
-        
         
         Button buttonSaveOptions = new Button ("Uložiť");
         buttonSaveOptions.setOnAction((event) -> {
@@ -546,7 +544,7 @@ public class Project2019 extends Application {
         return HBOXChoices;
     }
   
-    //TODO upravit tabulku, odstranit nezmysly
+  
     private TableView createTable(TableView table, int id) {
 
       table.setMaxHeight(Design.maxTableHeight);
@@ -710,8 +708,8 @@ public class Project2019 extends Application {
         
         MenuItem globalClustCoeff = new MenuItem("Globálny zhlukovací koeficient");
         globalClustCoeff.setOnAction((event) -> {
-          ClusteringCoefficients cc = new ClusteringCoefficients(network);
-          cc.count();
+          SimpleNetworkProperties snp = new SimpleNetworkProperties();
+          snp.getClusteringCoefficient(network);
         });
         
         MenuItem density = new MenuItem("Hustota siete");
@@ -719,22 +717,7 @@ public class Project2019 extends Application {
           SimpleNetworkProperties snp = new SimpleNetworkProperties();
           snp.getNetworkDensity(network);
         });
-        
-        
-        MenuItem numberOfComponents = new MenuItem("Počet komponent");
-        numberOfComponents.setOnAction((event) -> {
-          
-            SimpleNetworkProperties snp = new SimpleNetworkProperties();
-            snp.getNumberOfComponents(network);
-            NetworkDrawer.redrawNetwork(network, canvas1);
-//            UserSettingsWindow usw = new UserSettingsWindow();
-//            usw.openUserSettingsWindow(copyOfPrimaryStage);
-            
-//            
-//            NumberOfComponents noc = new NumberOfComponents(network);
-//            noc.getNumberOfComponents();
-        });
-        
+           
         
         MenuItem avgCloseness = new MenuItem("Priemerná closeness centralita");
         avgCloseness.setOnAction((event) -> {
@@ -748,9 +731,8 @@ public class Project2019 extends Application {
           b.count();
         });
         
-        statistics.getItems().addAll(avgDegree,diamter, globalClustCoeff,density, avgCloseness, avgBetween, numberOfComponents);
-        
-        
+        statistics.getItems().addAll(avgDegree,diamter, globalClustCoeff,density, avgCloseness, avgBetween);
+       
         mainMenu.getMenus().addAll( menu2, menuLayouts, statistics, chartAnalysis); //menuCentralities
 
         return mainMenu;
@@ -804,8 +786,29 @@ public class Project2019 extends Application {
      
      
      
+    public void cleanCanvas()
+    {
+        GraphicsContext gc = canvas1.getGraphicsContext2D();
+        gc.setFill(Color.WHITE);
+        gc.setStroke(Color.BLACK);
+        gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
+
+        gc.strokeLine(0, 0, Design.canvasWidth, 0); // UP -> in general start x,y, end x, y
+        gc.strokeLine(0, 0, 0, Design.canvasHeight); // LEFT
+        gc.strokeLine(Design.canvasWidth,Design.canvasHeight, 0,Design.canvasHeight); // DOWN
+        gc.strokeLine(Design.canvasWidth, 0, Design.canvasWidth, Design.canvasHeight); 
+        gc.stroke();
+    }
+     
      public void runLayout(final Layout layout) {
         if (network == null) {
+            return;
+        }
+        
+        else if(checkboxDrawNetwork.isSelected() == false)
+        {
+            System.out.println("Checkbox selected je " + checkboxDrawNetwork.isSelected());
+            cleanCanvas();
             return;
         }
 
@@ -813,17 +816,7 @@ public class Project2019 extends Application {
             @Override
             protected Object call() throws Exception {
                 
-                GraphicsContext gc = canvas1.getGraphicsContext2D();
-                gc.setFill(Color.WHITE);
-                gc.setStroke(Color.BLACK);
-                gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
-
-                gc.strokeLine(0, 0, Design.canvasWidth, 0); // UP -> in general start x,y, end x, y
-                gc.strokeLine(0, 0, 0, Design.canvasHeight); // LEFT
-                gc.strokeLine(Design.canvasWidth,Design.canvasHeight, 0,Design.canvasHeight); // DOWN
-                gc.strokeLine(Design.canvasWidth, 0, Design.canvasWidth, Design.canvasHeight); 
-                gc.stroke();
-
+                cleanCanvas();
                 
                 System.out.println("Stav networkWasCreated je "+networkWasCreated);
                 if(networkWasCreated)
@@ -876,7 +869,6 @@ public class Project2019 extends Application {
         Thread tr = new Thread(task);
         tr.setDaemon(true);
         tr.start();
-
     }
     
     
@@ -893,22 +885,13 @@ public class Project2019 extends Application {
         
            vbox.getChildren().remove(filtersGridTitlePane);
            vbox.getChildren().remove(eatingHabbits);
-
-           
-           
-  
            
          ArrayList<Headers> headers = PrepareDifferentDataSource.getHeaders(pathToFile);
          HBox a =  somethin("Atribúty", 0 , 0, headers);
          selectedHeaders.clear();
          vbox.getChildren().add(0,a);
-          
-            NEWPreprocessing.getRelevantRecords(pathToFile, headers, false);
-           
-  
-             
+         NEWPreprocessing.getRelevantRecords(pathToFile, headers, false);
         }
-
     }
     
   
@@ -1010,90 +993,23 @@ public class Project2019 extends Application {
 
     @Override
     public void start(Stage primaryStage) throws FileNotFoundException {
-          Rectangle2D screenBounds = Screen.getPrimary().getBounds();
-    System.out.println(screenBounds.getWidth()+ "x "+screenBounds.getHeight());
+        Rectangle2D screenBounds = Screen.getPrimary().getBounds();
+        //System.out.println(screenBounds.getWidth()+ "x "+screenBounds.getHeight());
         copyOfPrimaryStage = primaryStage;
         Group root = new Group();
         Scene scene = new Scene(root, Design.sceneWidth, Design.sceneHeight/*Color.CADETBLUE*/);
         
-        
-      
-        
-        
-        
-        
-//        scene.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
-//    @Override
-//    public void handle(MouseEvent mouseEvent) {
-//        if(network != null)
-//        {
-//            Collection<Vertex> vertices = network.getVertices();
-//            ArrayList<Vertex> vv = new ArrayList
-//            
-//        }
-//        System.out.println("mouse click detected! " + mouseEvent.getSource()+ "x: "+mouseEvent.getX() + "y: "+mouseEvent.getY());
-//    }
-//});
-       
         primaryStage.setTitle("Nástroj na tvorbu sietí");
         primaryStage.setWidth(Design.sceneWidth);
         primaryStage.setHeight(Design.sceneHeight);
   
-        //filters
-  
-        List<String> filterValues = SeparateDataIntoRelatedSections.getAllPosibleValuesForFilter(HeadersIndexes.indexOfYearColumn);   
-        final ChoiceBox choicesYears = createChoiceBox(filterByYearText, filterValues);
-        year = Integer.parseInt(filterValues.get(0));
-        final HBox HBOXfilterByYear = createHbox(filterByYearText, choicesYears);
-        
-        filterValues = SeparateDataIntoRelatedSections.getAllPosibleValuesForFilter(HeadersIndexes.indexOfSexColumn);
-        final ChoiceBox choicessexes = createChoiceBox(filterBySexText, filterValues);
-        sex = Integer.parseInt(filterValues.get(0));
-        final HBox HBOXfilterBySex = createHbox(filterBySexText,choicessexes);
-        
-        filterValues = SeparateDataIntoRelatedSections.getAllPosibleValuesForFilter(HeadersIndexes.indexOfRegionColumn);
-        final ChoiceBox choicesRegions = createChoiceBox(filterByRegionText, filterValues);
-        region = Integer.parseInt(filterValues.get(0));
-        final HBox HBoxfilterByRegion = createHbox(filterByRegionText, choicesRegions);
-        
-        filterValues = SeparateDataIntoRelatedSections.getAllPosibleValuesForFilter(HeadersIndexes.indexOfSchoolColumn);
-        final ChoiceBox choicesSchools = createChoiceBox(filterBySchoolText, filterValues);
-        school = Integer.parseInt(filterValues.get(0));
-        final HBox HBoxfilterBySchool = createHbox(filterBySchoolText, choicesSchools);
-       
-        filterValues = SeparateDataIntoRelatedSections.getAllPosibleValuesForFilter(HeadersIndexes.indexOfGradeColumn);
-        final ChoiceBox choicesGrades = createChoiceBox(filterByGradeText, filterValues);
-        grade = Integer.parseInt(filterValues.get(0));
-        final HBox HBoxfilterByGrade = createHbox(filterByGradeText, choicesGrades);
-        
-        filtersGridTitlePane = new TitledPane();
-        GridPane grid = new GridPane();
-        grid.setVgap(4);
-        grid.setPadding(new Insets(5, 5, 5, 5));
-        grid.add(HBOXfilterBySex, 0, 0);
-        grid.add(HBOXfilterByYear, 0, 1);
-        grid.add(HBoxfilterByGrade, 0, 2);
-        grid.add(HBoxfilterByRegion, 0, 3);
-        grid.add(HBoxfilterBySchool, 0, 4);        
-        filtersGridTitlePane.setText("Filtre");
-        filtersGridTitlePane.setContent(grid);
-        filtersGridTitlePane.setExpanded(false);
-        
-    
-        Map<Integer, List<Headers>> sectionsHeadersNames =BoxesRelatedSections.something(pathToFile,",");
-
-        
-        //related sections
-         unfinished("Stravovacie návyky", sectionsHeadersNames.get(1));
-
-        eatingHabbits =  somethin("Stravovacie návyky", 6,21, null);
-        
         choicesColorizeByAttribute.getSelectionModel().selectFirst();
-      
+     
         choicesNetworkMethodCreation.getSelectionModel().selectFirst();
         choicesEmptyRecords.getSelectionModel().selectLast();
         choicesMetrics.getSelectionModel().selectFirst();
         choicesNetworkMethodCreation.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+ 
         @Override
         public void changed(ObservableValue<? extends Number> observable,
             Number oldVal, Number newVal) {
@@ -1332,14 +1248,22 @@ public class Project2019 extends Application {
       
        HBOXNetworkParamsColorize.getChildren().addAll(labelColorize, choicesColorizeByAttribute);
         
+         final HBox box = new HBox( 5.0, new Label("Normalizovať data"), checkboxNormalization,
+                              new Label("Zachovať layout"), checkboxSaveLayout,
+                              new Label("Vykresliť sieť"), checkboxDrawNetwork);
+   
+    
         
+        checkboxDrawNetwork.setSelected(true);
+       
+       
         vbox = new VBox();
         vbox.setSpacing(5);
         
         vbox.setPadding(new Insets(30, 0, 0, Design.canvasWidth + 50)); //TODO dynamicky posledne bolo 930
         
         
-        vbox.getChildren().addAll(filtersGridTitlePane, eatingHabbits,createTable(table, 1),HBOXNetworkCreation,slider, HBOXNetworkCreationParams, HBoxNetworkCreationParams,box,separatorTest,HBOXNetworkParamsColorize, buttonCreateNetwork, numberOfVertices, numberOfEdges, numberOfComponents, chosenLayout);//HBOxPhysical
+        vbox.getChildren().addAll(createTable(table, 1),HBOXNetworkCreation,slider, HBOXNetworkCreationParams, HBoxNetworkCreationParams,box,separatorTest,HBOXNetworkParamsColorize, buttonCreateNetwork, numberOfVertices, numberOfEdges, numberOfComponents, chosenLayout);//HBOxPhysical
    
         root.getChildren().addAll(vbox);
         
@@ -1487,8 +1411,8 @@ public class Project2019 extends Application {
                 sliderValue.setText(slider.getValue()+"");
                 System.out.println("******* Idem vykreslit");
                 //TODO here is network created
-                 //  runLayoutOrDisplayWarning(currentLayout);
-//                
+                   runLayoutOrDisplayWarning(currentLayout);
+                
                 dataWasChanged = false;
                 
                     loadingStage.close();

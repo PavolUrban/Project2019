@@ -63,27 +63,15 @@ public class CustomDataSourceSettingsView {
     
     public static void modifyMainPage(VBox vbox, List<Headers> selectedHeaders,  ObservableList<SelectedAtributes> data)
     {
-        //remove filters designed for default dataseet
-        vbox.getChildren().remove(0);
-        vbox.getChildren().remove(0);
         selectedHeaders.clear();
         data.clear();
-        System.out.println("Toto je size data");
-        System.out.println("Cistim selecet headers na  "+selectedHeaders.size());
-                ArrayList<Headers> headers = new ArrayList();
-                try {
-                    headers = PrepareDifferentDataSource.getHeaders(UserSettings.pathToDataset);
-    
-
-//         vbox.getChildren().add(0,a);
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(CustomDataSourceSettingsView.class.getName()).log(Level.SEVERE, null, ex);
-                }
-          
-                for(Headers h: headers)
-                {
-                    System.out.println(h.getId() +" ma meno"+ h.getHeaderName());
-                }
+        ArrayList<Headers> headers = new ArrayList();
+        
+        try {
+            headers = PrepareDifferentDataSource.getHeaders(UserSettings.pathToDataset);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(CustomDataSourceSettingsView.class.getName()).log(Level.SEVERE, null, ex);
+        }  
     }
     
    

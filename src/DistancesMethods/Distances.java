@@ -16,19 +16,7 @@ import java.util.Objects;
  */
 public class Distances {
   
-    //Note: Default method is euclidean 
-    
-  //Pearson  
-//     distance = Distances.countPearsonCorrelationCoefficient(values1,values2, values1.stream().mapToDouble(val -> val).average().orElse(0.0), values2.stream().mapToDouble(val -> val).average().orElse(0.0));
-//                            
-//                            distance = 1 - Math.abs(distance);
-//                            System.out.println("Pearson hodnota "+distance);
-// 
-//   
-    
-    
-    
-    
+    //Note: Default method is euclidean  
     
     public static double countDistance(String distanceMethod,ArrayList<Double> values1, ArrayList<Double> values2)
     {
@@ -74,8 +62,9 @@ public class Distances {
        //double finalResult = Math.exp(- (sum / lambda));
        //double lambda = 1/(Math.pow(2*1, 2));
         
-        
-       double finalResult = Math.exp(-1 * sum);
+       //1- .. it is used to transform similarity to distance 
+       double finalResult = 1 - Math.exp(-1 * (sum / 2)); //lambda's behavior is like it is set to 1
+       
        
         return finalResult;
     }
@@ -144,6 +133,7 @@ public class Distances {
         //to convert correlation into distance
         double convertedFinalResult = 1 - Math.abs(finalResult);
       
+        System.out.println(convertedFinalResult);
         return convertedFinalResult;
     }
     
