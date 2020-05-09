@@ -50,6 +50,30 @@ public class Exports
             if (file != null) {
                 try {
                     fw = new FileWriter(file, true);                  
+    
+                    fw.write("nodedef>name VARCHAR,color VARCHAR");
+                    fw.write("\n");
+                    
+                    for(Vertex v : network.getVertices())
+                    {
+                        String color = "";
+                        
+                        if(v.getClassName().equalsIgnoreCase("Leptodactylidae"))
+                            color = "'255,255,0'"; //yellow
+                        else if (v.getClassName().equalsIgnoreCase("Dendrobatidae"))
+                            color = "'51,51,255'"; //blue
+                        else if(v.getClassName().equalsIgnoreCase("Hylidae"))
+                            color = "'0,0,0'"; //black
+                        else //Bufonidae
+                            color = "'255,0,0'"; //red
+                            
+                        
+                        fw.write(v.getId()+ "," + color);
+                        fw.write("\n");
+                    }
+                    
+                    fw.write("edgedef>node1 VARCHAR,node2 VARCHAR");
+                    fw.write("\n");
                     
                     for(Edge e: network.getEdges())
                     {
@@ -59,7 +83,7 @@ public class Exports
                         String firstVertex = String.valueOf(v.getId());
                         String secondVertex = String.valueOf(v2.getId());
 
-                        fw.write(firstVertex+";"+secondVertex);
+                        fw.write(firstVertex+","+secondVertex);
                         fw.write("\n");
                     }
   

@@ -43,6 +43,8 @@ public class Vertex {
     private double revValue = -1;
     private String revChange = "";
 
+    private String className="";
+    
     public Vertex(int id) {
         this(id, "");
         
@@ -81,6 +83,11 @@ public class Vertex {
     public int getLocalDegree()
     {
         return this.localDegree;
+    }
+    
+    public String getClassName()
+    {
+        return this.className;
     }
     
     public Map<Integer, Double> getLRNeighbours()
@@ -157,6 +164,11 @@ public class Vertex {
     public void setIndexInVerticesArray(int index)
     {
         this.indexInVerticesArray = index;
+    }
+    
+    public void setClassName(String className)
+    {
+        this.className = className;
     }
     
     public void setAllSimilarities(List<Double> similarities)

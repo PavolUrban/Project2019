@@ -13,6 +13,8 @@ import UserSettings.UserSettings;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseGraph;
 import java.io.FileNotFoundException;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -82,6 +84,7 @@ public class LRNet
         
         for(Vertex v : vertices)
         {
+            System.out.println("local degree "+vertexIndex);
             List<Double> similarityValues = DoubleStream.of(similarityMatrix[vertexIndex]).boxed().collect(Collectors.toList());
             v.setAllSimilarities(similarityValues);
             v.setLocalDegree(getLocalDegree(similarityValues, vertexIndex, v, vertices));
@@ -180,6 +183,7 @@ public class LRNet
         int indexV1 = 0;
         for(Vertex v1 : vertices)
         {
+            System.out.println("counting "+indexV1);
             int indexV2 = 0;
             for(Vertex v2 : vertices)
             {
@@ -203,7 +207,7 @@ public class LRNet
         System.out.println("Counting LRNET");
         List<Vertex> vertices = new ArrayList<>(); 
         SparseGraph <Vertex, Edge> graph = new SparseGraph<>();
-
+ ZonedDateTime startTime = ZonedDateTime.now();
         //add vertices and get values from proper columns (attributes)
         int index = 0;
         for(ChosenRecords cr : lines)
@@ -217,15 +221,23 @@ public class LRNet
             graph.addVertex(v);
             index++;
         }
-        
+        System.out.println("Counting similarityMatrix");
         double[][] similarityMatrix = countSimilarityMatrix(vertices);
+        System.out.println("**Asinging local degree");
+        
         assignLocalDegree(vertices, similarityMatrix);
+        
+        System.out.println("Counting similarityMatrix");
         assignLocalSignificance(vertices);  
         setRepresentativeness(vertices, 1);
         
         int edgeId = 0;
+        
+        int idToDel =0 ;
         for(Vertex v :vertices)
         {
+            System.out.println("Pracujem na "+idToDel);
+            idToDel++;
             for (Map.Entry<Integer, Double> neighbour : v.getLRNeighbours().entrySet())
             {
                 Edge e = new Edge(edgeId, neighbour.getValue());           
@@ -233,6 +245,16 @@ public class LRNet
                 edgeId++;
             }
         }
+        
+        
+                     ZonedDateTime endTime = ZonedDateTime.now();
+
+Duration duration = Duration.between(startTime, endTime);
+        
+        System.out.println("pocet uzlov "+ graph.getVertexCount()+ " a epsilon bol "+ epsilon);
+        System.out.println("pocet hran "+ graph.getEdgeCount());
+        System.out.println("cas "+ duration.toMillis()+" ms");
+       
         
         return graph;
     }

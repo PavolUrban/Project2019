@@ -14,6 +14,8 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseGraph;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,6 +40,7 @@ public class KNearestNeighbor {
             
             Vertex v = new Vertex(cr.getRecordId());
             v.setClusterId(UserSettings.mapAliasingForColorization.get(cr.getClassName()));
+            v.setClassName(cr.getClassName());
             v.setValuesOfProps(values);
             vertices.add(v);
             graph.addVertex(v);
@@ -49,11 +52,11 @@ public class KNearestNeighbor {
         
         
         int v1Index = 0;
-        
+        ZonedDateTime startTime = ZonedDateTime.now();
         
         for(Vertex v1 : vertices)
         {
-         //   System.out.println("Pracujem na uzle "+v1.getId());
+            System.out.println("Pracujem na uzle "+v1Index);
             int numberOfNeighbours = 0;
             
             int v2Index = 0;
@@ -114,7 +117,15 @@ public class KNearestNeighbor {
             
             v1Index++;
         }
+        
+              ZonedDateTime endTime = ZonedDateTime.now();
+
+Duration duration = Duration.between(startTime, endTime);
     
+        
+        System.out.println("pocet uzlov "+ graph.getVertexCount()+ " a k bolo "+k);
+        System.out.println("pocet hran "+ graph.getEdgeCount());
+        System.out.println("cas "+ duration.toMillis()+" ms");
         
         return graph;
     }

@@ -12,7 +12,10 @@ import NetworkComponents.Vertex;
 import UserSettings.UserSettings;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseGraph;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,6 +27,11 @@ public class EpsilonNew {
     
     public Graph<Vertex, Edge> createEpsilonNetwork(List<ChosenRecords> lines, String distanceMethod, double epsilon)
     {
+        
+        ZonedDateTime startTime = ZonedDateTime.now();
+
+        
+        
         List<Vertex> vertices = new ArrayList<>(); 
         SparseGraph <Vertex, Edge> graph = new SparseGraph<>();
 
@@ -34,8 +42,9 @@ public class EpsilonNew {
             Vertex v = new Vertex(cr.getRecordId());
             v.setValuesOfProps(values);
             v.setClusterId(UserSettings.mapAliasingForColorization.get(cr.getClassName()));
+            v.setClassName(cr.getClassName());
 //            System.out.println(cr.getClassName() +" vs "+ v.clusterId);
-//            System.out.println(values);
+//            System.out.println(val0,0ues);
             vertices.add(v);
             graph.addVertex(v);
         }
@@ -44,9 +53,12 @@ public class EpsilonNew {
         int edgeId = 0;
         double maxDistance = 0.0;
         
+        int toDeleteIndex = 0;
         //add edges
         for(Vertex v1 : vertices)
         {
+            System.out.println("Computing "+toDeleteIndex);
+            toDeleteIndex++;
             for(Vertex v2 : vertices)
             {
                 if(v1.getId() != v2.getId()) //self-loops dissalowed
@@ -70,6 +82,14 @@ public class EpsilonNew {
         
         UserSettings.maxSliderValue = maxDistance;
         
+        ZonedDateTime endTime = ZonedDateTime.now();
+
+Duration duration = Duration.between(startTime, endTime);
+        
+        System.out.println("pocet uzlov "+ graph.getVertexCount()+ " a epsilon bol "+ epsilon);
+        System.out.println("pocet hran "+ graph.getEdgeCount());
+        System.out.println("cas "+ duration.toMillis()+" ms");
+       
         return graph;
         
     }

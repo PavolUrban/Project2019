@@ -20,6 +20,8 @@ public class ChosenRecords {
     List<Integer> emptyPropertiesIndexes;
     
     
+    String testClassName;
+    
     public ChosenRecords(int id)
     {
         this.id = id;

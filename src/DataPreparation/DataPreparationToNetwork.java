@@ -241,15 +241,20 @@ public class DataPreparationToNetwork {
         for(String line : lines)
         {
             //todo remove this cycle
-            if(id>151)
-            {
-                break;
-            }
+//            if(id>151)
+//            {
+//                break;
+//            }
+            
+            
+            
            
             boolean hasEmptyProperty = false;
 
             String [] array = line.split(UserSettings.separator); 
            
+           
+            
             ChosenRecords cr = null;
              
             

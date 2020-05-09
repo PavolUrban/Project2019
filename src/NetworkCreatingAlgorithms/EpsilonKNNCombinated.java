@@ -12,6 +12,8 @@ import NetworkComponents.Vertex;
 import UserSettings.UserSettings;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseGraph;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,17 +37,20 @@ public class EpsilonKNNCombinated {
             
             Vertex v = new Vertex(cr.getRecordId());
             v.setClusterId(UserSettings.mapAliasingForColorization.get(cr.getClassName()));
+            v.setClassName(cr.getClassName());
             v.setValuesOfProps(values);
             vertices.add(v);
             graph.addVertex(v);
         }
         
+        ZonedDateTime startTime = ZonedDateTime.now();
         
         int edgeId = 0;
-        
+        int idToDel = 0;
         for(Vertex v1 : vertices)
         {
-            
+            System.out.println("Pracujem na "+idToDel);
+            idToDel++;
             int v2Index = 0;
             
             for(Vertex v2 : vertices)
@@ -118,6 +123,15 @@ public class EpsilonKNNCombinated {
                 System.out.println(v1.neighoursIdsAndDistances);
             }        
         }
+        
+              ZonedDateTime endTime = ZonedDateTime.now();
+
+Duration duration = Duration.between(startTime, endTime);
+        
+        System.out.println("pocet uzlov "+ graph.getVertexCount()+ " a epsilon bol "+ epsilon);
+        System.out.println("pocet hran "+ graph.getEdgeCount());
+        System.out.println("cas "+ duration.toMillis()+" ms");
+       
         
         return graph;
     }

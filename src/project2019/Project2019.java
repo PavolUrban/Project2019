@@ -34,6 +34,8 @@ import NetworkComponents.Vertex;
 import UserSettings.UserSettings;
 import edu.uci.ics.jung.algorithms.shortestpath.DistanceStatistics;
 import edu.uci.ics.jung.graph.Graph;
+import static edu.uci.ics.jung.graph.util.EdgeType.DIRECTED;
+import edu.uci.ics.jung.graph.util.Pair;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -71,6 +73,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
@@ -96,6 +99,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -131,6 +135,9 @@ public class Project2019 extends Application {
     TitledPane filtersGridTitlePane;
     VBox vbox;
     
+    
+    Stage loadingStage;
+    Label labelWaitPlease;
 
     //filters active-inactive
     Boolean filterByGrade = false;
@@ -141,9 +148,9 @@ public class Project2019 extends Application {
     
     String filterByGradeText = "Ročník";
     String filterByRegionText = "Kraj";
-    String filterBySexText = "Pohlaví";
+    String filterBySexText = "Pohlavie";
     String filterBySchoolText = "Škola";
-    String filterByYearText = "Rok narození";
+    String filterByYearText = "Rok narodenia";
     
     Boolean attributesWasChanged = true;
     
@@ -156,7 +163,7 @@ public class Project2019 extends Application {
     
     //Top edges related
     TextField textFieldTopEdges = new TextField("20");
-    Label labelTopEdges = new Label("Procento nejvýznamnějších hran: ");
+    Label labelTopEdges = new Label("Percento najvýznamnejších hrán: ");
     
     
     //KNN related
@@ -165,7 +172,7 @@ public class Project2019 extends Application {
     
     Label labelForSlider = new Label("Hodnota ε:");
     ChoiceBox choicesNetworkMethodCreation = new ChoiceBox(FXCollections.observableArrayList(
-    "ε-okolí ", "KNN", "Nejvýznamnejší hrany", "Kombinace ε-okolí a KNN", "LRNet")
+    "ε-okolie", "k-NN", "Najvýznamnejšie hrany", "Kombinácia ε-okolie a k-NN", "LRNet")
     );
     
      ChoiceBox choicesMetrics = new ChoiceBox(FXCollections.observableArrayList(
@@ -173,7 +180,7 @@ public class Project2019 extends Application {
     );
      
      ChoiceBox choicesEmptyRecords = new ChoiceBox(FXCollections.observableArrayList(
-        "Doplnit medián","Doplnit průměr","Smazat záznam")
+        "Doplniť medián","Doplniť priemer","Zmazať záznam")
     );
      
      ChoiceBox choicesColorizeByAttribute = new ChoiceBox(FXCollections.observableArrayList(
@@ -183,7 +190,7 @@ public class Project2019 extends Application {
     CheckBox checkboxNormalization = new CheckBox(); 
     CheckBox checkboxSaveLayout = new CheckBox();
     
-    HBox box = new HBox( 5.0, new Label("Normalizovat data"), checkboxNormalization, new Label("Zachovat rozmístnění uzlů"), checkboxSaveLayout);
+    HBox box = new HBox( 5.0, new Label("Normalizovať data"), checkboxNormalization, new Label("Zachovať layout"), checkboxSaveLayout);
    
     
     Boolean saveLayout = true;
@@ -201,9 +208,9 @@ public class Project2019 extends Application {
     
     Boolean layoutWasChosen=false;
    
-    Label labelNetworkCreationMethod = new Label("Metoda vytvoření sítě");
+    Label labelNetworkCreationMethod = new Label("Metóda vytvorenia siete");
     Label labelDistanceMethod = new Label("Metrika");
-    Label labelEmptyRecordsAction = new Label("Prázdné záznamy");
+    Label labelEmptyRecordsAction = new Label("Prázdne záznamy");
     Boolean networkWasCreated = false;
     
     
@@ -219,16 +226,16 @@ public class Project2019 extends Application {
         Scene secondScene = new Scene(secondaryLayout, 400, 400);
  
         String pathToFile;
-        Label labelFilePath = new Label("Vybraný soubor");
-        Label labelFilePathValue = new Label("Nevybráno!");
+        Label labelFilePath = new Label("Vybraný súbor");
+        Label labelFilePathValue = new Label("Nevybrané!");
         Label labelSeparator = new Label("Separátor");
 
-        Button buttonAddFile = new Button ("Vybrat datový soubor");
+        Button buttonAddFile = new Button ("Vybrať dátový súbor");
         Stage newWindow;
         
         // New window (Stage)
         newWindow = new Stage();
-        newWindow.setTitle("Import vlastního datového souboru");
+        newWindow.setTitle("Import vlastného dátového súboru");
         newWindow.setScene(secondScene);
 
         // Set position of second window, related to primary window.
@@ -244,12 +251,12 @@ public class Project2019 extends Application {
             File selectedFile = fileChooser.showOpenDialog(newWindow);
         
             labelFilePathValue.setText(selectedFile.getPath());
-            buttonAddFile.setText("Změnit datový soubor");
+            buttonAddFile.setText("Zmeniť dátový súbor");
         });          
         
         Label labelHeader = new Label("Hlavička");
-        ChoiceBox choiceBoxHeader = new ChoiceBox(FXCollections.observableArrayList("Ano", "Ne"));
-        choiceBoxHeader.setValue("Ano");
+        ChoiceBox choiceBoxHeader = new ChoiceBox(FXCollections.observableArrayList("Áno", "Nie"));
+        choiceBoxHeader.setValue("Áno");
         choiceBoxHeader.setMaxWidth(50);
         
         ChoiceBox choiceBoxSeparator = new ChoiceBox(FXCollections.observableArrayList(";", ","));
@@ -276,12 +283,12 @@ public class Project2019 extends Application {
         grid.setAlignment(Pos.CENTER);
         
         
-        Button buttonSaveOptions = new Button ("Uložit");
+        Button buttonSaveOptions = new Button ("Uložiť");
         buttonSaveOptions.setOnAction((event) -> {
      
             //file path is not set
-            if(labelFilePathValue.getText().equalsIgnoreCase("Nevybráno!"))
-                AlertsWindows.displayAlert("Pro pokračování je potřeba vybrat soubor");
+            if(labelFilePathValue.getText().equalsIgnoreCase("Nevybrané!"))
+                AlertsWindows.displayAlert("Pre pokračovánie je potrebné vybrať súbor");
             
             else
             {
@@ -290,7 +297,7 @@ public class Project2019 extends Application {
                 UserSettings.pathToDataset = labelFilePathValue.getText();
                 UserSettings.separator = choiceBoxSeparator.getValue().toString();
                 
-                if(choiceBoxHeader.getValue().toString().equalsIgnoreCase("Ano"))
+                if(choiceBoxHeader.getValue().toString().equalsIgnoreCase("Áno"))
                     UserSettings.hasHeader = true;
                 
                 else
@@ -307,7 +314,7 @@ public class Project2019 extends Application {
                 }
                 HBox a = new HBox();
                 try {
-                    a = somethin("Atributy", 0 , 0, headers);
+                    a = somethin("Atribúty", 0 , 0, headers);
                 } catch (FileNotFoundException ex) {
                     Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -323,7 +330,7 @@ public class Project2019 extends Application {
  
         });
         
-        Button buttonCloseOptions = new Button ("Zrušit");
+        Button buttonCloseOptions = new Button ("Zrušiť");
         buttonCloseOptions.setOnAction((event) -> {
             //todo add are you sure dialog
             newWindow.close();
@@ -361,7 +368,7 @@ public class Project2019 extends Application {
         List<CustomMenuItem> items = new ArrayList();
         List<CheckBox> checkboxes = new ArrayList();
 
-        CheckBox selectAll = new CheckBox("Označit vše");  
+        CheckBox selectAll = new CheckBox("Označiť všetko");  
         
         // select/unselect all
         selectAll.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -373,10 +380,10 @@ public class Project2019 extends Application {
                 }
 
                 if(new_val)
-                    selectAll.setText("Odznačit vše");
+                    selectAll.setText("Odznačiť všetko");
                 
                 else if(!new_val)
-                     selectAll.setText("Označit vše");
+                     selectAll.setText("Označiť všetko");
             }
         });
         
@@ -454,7 +461,7 @@ public class Project2019 extends Application {
         List<CustomMenuItem> items = new ArrayList();
         List<CheckBox> checkboxes = new ArrayList();
 
-        CheckBox selectAll = new CheckBox("Označit vše");  
+        CheckBox selectAll = new CheckBox("Označiť všetko");  
         selectAll.selectedProperty().addListener(new ChangeListener<Boolean>() {
             public void changed(ObservableValue ov,Boolean old_val, Boolean new_val) 
             {       
@@ -465,11 +472,11 @@ public class Project2019 extends Application {
 
                 if(new_val)
                 {
-                    selectAll.setText("Odznačit vše");
+                    selectAll.setText("Odznačiť všetko");
                 }
                 else if(!new_val)
                 {
-                     selectAll.setText("Označit vše");
+                     selectAll.setText("Označiť všetko");
                 }               
             }
         });
@@ -545,7 +552,7 @@ public class Project2019 extends Application {
       table.setMaxHeight(Design.maxTableHeight);
       table.setMinWidth(Design.minTableWidth);
       
-      TableColumn lastNameCol = new TableColumn("Vybrané atributy");
+      TableColumn lastNameCol = new TableColumn("Vybrané atribúty");
       lastNameCol.setCellValueFactory(new PropertyValueFactory<>("firstName"));
 
 
@@ -590,7 +597,7 @@ public class Project2019 extends Application {
         }
         else 
         {
-            AlertsWindows.displayAlert("Pro aplikování layoutu je nutné nejdříve vytvořit síť.");
+            AlertsWindows.displayAlert("Pre aplikovanie layoutu je nutné najskôr vytvoriť sieť.");
         }
     }
      
@@ -599,7 +606,7 @@ public class Project2019 extends Application {
         mainMenu.setMinSize(Design.sceneWidth, 10);
 
    
-        Menu menu2 = new Menu("Soubor");
+        Menu menu2 = new Menu("Súbor");
         MenuItem exitItem = new MenuItem("Exit", null);
         exitItem.setMnemonicParsing(true);
         exitItem.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN));
@@ -607,20 +614,20 @@ public class Project2019 extends Application {
             Platform.exit();
         });
 
-        MenuItem saveAsNetwork = new MenuItem("Save network", null);
+        MenuItem saveAsNetwork = new MenuItem("Uložiť sieť", null);
         saveAsNetwork.setMnemonicParsing(true);
         saveAsNetwork.setOnAction((event) -> {
             Exports.saveNetworkAsConnectedVerticesList(copyOfPrimaryStage, network);
         });
         
-        MenuItem saveAsChosenRecords = new MenuItem("Save selected...", null);
+        MenuItem saveAsChosenRecords = new MenuItem("Uložiť sieť 2", null);
         saveAsChosenRecords.setMnemonicParsing(true);
         saveAsChosenRecords.setOnAction((event) -> {
             Exports.saveNetworkAsConnectedVerticesList(copyOfPrimaryStage);
         });
         
         
-        MenuItem chooseDataFile = new MenuItem("Načíst datový soubor");
+        MenuItem chooseDataFile = new MenuItem("Načítať dátový súbor");
         chooseDataFile.setOnAction((event) -> {
             openNewDataSourceWindow(copyOfPrimaryStage);          
         });
@@ -663,7 +670,7 @@ public class Project2019 extends Application {
         menuLayouts.getItems().addAll(itemCircularLayout, itemISOMLayout, itemKKLayout, itemFRLayout);
 
         // Analysis based on charts        
-        Menu chartAnalysis =  new Menu("Grafy");
+        Menu chartAnalysis =  new Menu("Centrality");
         
         MenuItem betweeness = new MenuItem("Betweeness");
         betweeness.setOnAction((event) -> {
@@ -675,7 +682,7 @@ public class Project2019 extends Application {
           networkAndTableState(2);
         });
         
-        MenuItem degree = new MenuItem("Stupeň uzlu");
+        MenuItem degree = new MenuItem("Stupeň uzlov");
         degree.setOnAction((event) -> {
           networkAndTableState(3);
         });
@@ -687,27 +694,27 @@ public class Project2019 extends Application {
         
         chartAnalysis.getItems().addAll(betweeness, closeness, degree, degreeCentrality);
         
-        Menu statistics = new Menu("Analýza sítě");
+        Menu statistics = new Menu("Analýza siete");
         
-        MenuItem avgDegree = new MenuItem("Průmerný stupeň uzlu");
+        MenuItem avgDegree = new MenuItem("Priemerný stupeň uzlu");
         avgDegree.setOnAction((event) -> {
            SimpleNetworkProperties snp = new SimpleNetworkProperties();
            snp.getAverageDegree(network);
         });
         
-        MenuItem diamter = new MenuItem("Průmer sítě");
+        MenuItem diamter = new MenuItem("Priemer siete");
         diamter.setOnAction((event) -> {
           SimpleNetworkProperties snp = new SimpleNetworkProperties();
           snp.getDiameter(network);
         });
         
-        MenuItem globalClustCoeff = new MenuItem("Globální shlukovací koeficient");
+        MenuItem globalClustCoeff = new MenuItem("Globálny zhlukovací koeficient");
         globalClustCoeff.setOnAction((event) -> {
           ClusteringCoefficients cc = new ClusteringCoefficients(network);
           cc.count();
         });
         
-        MenuItem density = new MenuItem("Hustota sítě");
+        MenuItem density = new MenuItem("Hustota siete");
         density.setOnAction((event) -> {
           SimpleNetworkProperties snp = new SimpleNetworkProperties();
           snp.getNetworkDensity(network);
@@ -729,13 +736,13 @@ public class Project2019 extends Application {
         });
         
         
-        MenuItem avgCloseness = new MenuItem("Průměrná closeness centralita");
+        MenuItem avgCloseness = new MenuItem("Priemerná closeness centralita");
         avgCloseness.setOnAction((event) -> {
            Closennes c = new Closennes(network);
             c.count();
         });
         
-        MenuItem avgBetween = new MenuItem("Průměrná betweeness centralita");
+        MenuItem avgBetween = new MenuItem("Priemerná betweeness centralita");
         avgBetween.setOnAction((event) -> {
           Betweenness b = new Betweenness(network);
           b.count();
@@ -892,7 +899,7 @@ public class Project2019 extends Application {
   
            
          ArrayList<Headers> headers = PrepareDifferentDataSource.getHeaders(pathToFile);
-         HBox a =  somethin("Atributy", 0 , 0, headers);
+         HBox a =  somethin("Atribúty", 0 , 0, headers);
          selectedHeaders.clear();
          vbox.getChildren().add(0,a);
           
@@ -909,13 +916,13 @@ public class Project2019 extends Application {
      public HBox createHbox(String label, ChoiceBox locationchoiceBox)
      { 
         final ToggleGroup group = new ToggleGroup();
-        RadioButton buttonFilterYes = new RadioButton("Ano");
+        RadioButton buttonFilterYes = new RadioButton("Áno");
         buttonFilterYes.setToggleGroup(group);
-        buttonFilterYes.setUserData("Ano");
+        buttonFilterYes.setUserData("Áno");
 
-        RadioButton buttonFilterNo = new RadioButton("Ne");
+        RadioButton buttonFilterNo = new RadioButton("Nie");
         buttonFilterNo.setToggleGroup(group);
-        buttonFilterNo.setUserData("Ne"); 
+        buttonFilterNo.setUserData("Nie"); 
         buttonFilterNo.setSelected(true);
        
         final HBox HBOXfilterBySex = new HBox();
@@ -1028,7 +1035,7 @@ public class Project2019 extends Application {
 //    }
 //});
        
-        primaryStage.setTitle("Nástroj na tvorbu sítí");
+        primaryStage.setTitle("Nástroj na tvorbu sietí");
         primaryStage.setWidth(Design.sceneWidth);
         primaryStage.setHeight(Design.sceneHeight);
   
@@ -1068,7 +1075,7 @@ public class Project2019 extends Application {
         grid.add(HBoxfilterByGrade, 0, 2);
         grid.add(HBoxfilterByRegion, 0, 3);
         grid.add(HBoxfilterBySchool, 0, 4);        
-        filtersGridTitlePane.setText("Filtry");
+        filtersGridTitlePane.setText("Filtre");
         filtersGridTitlePane.setContent(grid);
         filtersGridTitlePane.setExpanded(false);
         
@@ -1077,9 +1084,9 @@ public class Project2019 extends Application {
 
         
         //related sections
-         unfinished("Stravovací návyky", sectionsHeadersNames.get(1));
+         unfinished("Stravovacie návyky", sectionsHeadersNames.get(1));
 
-        eatingHabbits =  somethin("Stravovací návyky", 6,21, null);
+        eatingHabbits =  somethin("Stravovacie návyky", 6,21, null);
         
         choicesColorizeByAttribute.getSelectionModel().selectFirst();
       
@@ -1199,7 +1206,7 @@ public class Project2019 extends Application {
       
         setSliderDefault(slider, false);
         slider.valueProperty().addListener((obs, oldval, newVal) -> {
-            sliderValue.setText(newVal.toString()+" -> ?% hran");
+            sliderValue.setText(newVal.toString());
             slider.setValue((newVal.doubleValue()));
             currentK = (int)(newVal.doubleValue());
             System.out.println("Menim current K na "+currentK);
@@ -1228,74 +1235,47 @@ public class Project2019 extends Application {
 
         });
         
-        Button buttonCreateNetwork =  new Button("Vytvořit síť!");
+        Button buttonCreateNetwork =  new Button("Vytvorit sieť!");
         buttonCreateNetwork.setOnAction((event) -> {
-            try {
+            if(data.isEmpty())
+            {
+                AlertsWindows.displayAlert("Pre vytvorenie siete je potrebné zvoliť dáta.");
+            }
+            
+            //if Kvalue is not set
+            else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 1 && textFieldKNN.getText().equalsIgnoreCase(""))
+            {
+                AlertsWindows.displayAlert("Prosím, nastavte hodnotu parametru k.");
+            }
+            
+            else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 2 && textFieldTopEdges.getText().equalsIgnoreCase(""))
+            {
+                AlertsWindows.displayAlert("Prosím. nastavte percento najvýznamnejších hrán.");
+            }
+            
+            else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 3 && textFieldKNN.getText().equalsIgnoreCase(""))
+            {
                 
-                //if nothing is in params table 
-                if(data.isEmpty())
-                {
-                    AlertsWindows.displayAlert("Pro vytvoření sítě je potřeba zvolit data.");
-                }
+            }
+            
+            else
+            {
                 
-                //if Kvalue is not set 
-                else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 1 && textFieldKNN.getText().equalsIgnoreCase(""))
-                {
-                    AlertsWindows.displayAlert("Prosím nastavte hodnotu parametru k.");
-                }
+                //TODO toto upravit na nieco rozumnejsie
                 
-                else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 2 && textFieldTopEdges.getText().equalsIgnoreCase(""))
-                {
-                    AlertsWindows.displayAlert("Prosím nastavte procento nejvýznamnejších hran.");
-                }
                 
-                else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 3 && textFieldKNN.getText().equalsIgnoreCase(""))
-                {
+                displayLoading(null);
                 
-                }
                 
-                else
-                {
-                    
-                    //TODO toto upravit na nieco rozumnejsie
-                    network = DataPreparationToNetwork.readSpecificLines(network,checkboxNormalization.isSelected(),choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex(),selectedHeaders, filterByYear,year, filterBySex,sex, filterByGrade,grade, filterByRegion,region, filterBySchool, school, slider.getValue(),choicesMetrics.getSelectionModel().getSelectedItem().toString(), textFieldKNN.getText(), textFieldTopEdges.getText());
+               
               
-                    double maxNumberOfEdges = (network.getVertexCount()*(network.getVertexCount()-1.0))/2.0;
-                    double percentilOfEdges = (network.getEdgeCount()/maxNumberOfEdges)*100;
-                    numberOfVertices.setText("Uzly: "+network.getVertexCount());
-                    
-                    NumberOfComponents noc = new NumberOfComponents(network);
-                    numberOfComponents.setText("Komponenty "+ noc.getNumberOfComponents());
-                    double roundedPercentil = (double) Math.round(percentilOfEdges * 100) / 100;
-                    
-                    numberOfEdges.setText("Hrany: "+network.getEdgeCount()+ " ("+ roundedPercentil + "%)");
-                  
-                    
-                    
-                    sliderValue.setText(slider.getValue()+"");
-                    runLayoutOrDisplayWarning(currentLayout);
-                    
-                    dataWasChanged = false;
-                    
-                    //if Epsilon network - set slider max value
-                    if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex()== 0)
-                        slider.setMax(UserSettings.maxSliderValue);
-                    else
-                    {
-                        int savedCurrentK = currentK;
-                        System.out.println("Vytvoril som siet a nastavujem slider na knn");
-                        setSliderForKnn(slider, maxK, minK, savedCurrentK);
-                    }
-                        
-                    
-                    //todo add button to table or something like that to decide what should be done with non-numeric property
-                    if(UserSettings.hasNonNumericProperty)
-                        AlertsWindows.displayNetworkHasNonNumericProperties(UserSettings.nonNumericPropertiesNames);
-                     
-                   
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
+                
+                
+                //todo add button to table or something like that to decide what should be done with non-numeric property
+                if(UserSettings.hasNonNumericProperty)
+                    AlertsWindows.displayNetworkHasNonNumericProperties(UserSettings.nonNumericPropertiesNames);
+                
+                
             }
         });
         
@@ -1385,6 +1365,142 @@ public class Project2019 extends Application {
         root.getChildren().add(createMainMenu());
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+    
+    
+    
+        public void displayLoading(File f) {
+        final ProgressIndicator pin = new ProgressIndicator();
+        pin.setProgress(-1.0f);
+        pin.setVisible(false);
+
+        final VBox vb = new VBox();
+        labelWaitPlease = new Label("Vytváram sieť. Počkajte, prosím...");
+        labelWaitPlease.setVisible(false);
+
+        Button start = new Button("Štart");
+
+        start.setOnAction((event) -> {
+            labelWaitPlease.setVisible(true);
+            pin.setVisible(true);
+            start.setDisable(true);
+            startTaskWithNetwork();
+        });
+
+        Button cancel = new Button("Zrušiť");
+        cancel.setOnAction((event) -> {
+            network = null;
+            loadingStage.close();
+            GraphicsContext gc = canvas1.getGraphicsContext2D();
+            gc.setFill(Color.WHITE);
+            gc.fillRect(0, 0, Design.canvasWidth, Design.canvasHeight);
+        });
+
+        Group root = new Group();
+        Scene scene = new Scene(root, 350, 350);
+        loadingStage = new Stage();
+        loadingStage.setScene(scene);
+        loadingStage.setTitle("Progress Controls");
+        start.setMinWidth(150);
+        start.setMaxWidth(150); //dynamicky
+        cancel.setMaxWidth(150);
+        cancel.setMinWidth(150);
+
+        HBox optionButtons = new HBox();
+        optionButtons.setSpacing(5);
+        optionButtons.getChildren().addAll(start, cancel);
+        optionButtons.setAlignment(Pos.CENTER);
+        vb.setSpacing(5);
+        vb.setAlignment(Pos.CENTER);
+        vb.getChildren().addAll(pin, labelWaitPlease, optionButtons);
+        scene.setRoot(vb);
+        loadingStage.initStyle(StageStyle.UNDECORATED);
+        loadingStage.show();
+    }
+        
+         public void startTaskWithNetwork() {
+        // Create a Runnable
+        Runnable task = new Runnable() {
+            public void run() {
+
+                try {
+                    runTask();
+                } catch (IOException ex) {
+                    Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        };
+
+        // Run the task in a background thread
+        Thread backgroundThread = new Thread(task);
+        // Terminate the running thread if the application exits
+        backgroundThread.setDaemon(true);
+        // Start the thread
+        backgroundThread.start();
+
+    }
+         
+         
+          public void runTask() throws IOException {
+//TODO toto treba niekde schovat
+              
+//              
+//                //if Epsilon network - set slider max value
+//                if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex()== 0)
+//                    slider.setMax(UserSettings.maxSliderValue);
+//                else
+//                {
+//                    int savedCurrentK = currentK;
+//                    System.out.println("Vytvoril som siet a nastavujem slider na knn");
+//                    setSliderForKnn(slider, maxK, minK, savedCurrentK);
+//                }
+              
+              
+              
+              
+        try {
+            
+            System.out.println("Starting creation");
+            network = DataPreparationToNetwork.readSpecificLines(network,checkboxNormalization.isSelected(),choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex(),selectedHeaders, filterByYear,year, filterBySex,sex, filterByGrade,grade, filterByRegion,region, filterBySchool, school, slider.getValue(),choicesMetrics.getSelectionModel().getSelectedItem().toString(), textFieldKNN.getText(), textFieldTopEdges.getText());
+  
+
+
+
+            // Update the Label on the JavaFx Application Thread
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    loadingStage.hide();
+                        double maxNumberOfEdges = (network.getVertexCount()*(network.getVertexCount()-1.0))/2.0;
+                double percentilOfEdges = (network.getEdgeCount()/maxNumberOfEdges)*100;
+                numberOfVertices.setText("Uzly: "+network.getVertexCount());
+                
+                NumberOfComponents noc = new NumberOfComponents(network);
+                numberOfComponents.setText("Komponenty "+ noc.getNumberOfComponents());
+                double roundedPercentil = (double) Math.round(percentilOfEdges * 100) / 100;
+                
+                numberOfEdges.setText("Hrany: "+network.getEdgeCount()+ " ("+ roundedPercentil + "%)");
+                
+                
+                
+                sliderValue.setText(slider.getValue()+"");
+                System.out.println("******* Idem vykreslit");
+                //TODO here is network created
+                 //  runLayoutOrDisplayWarning(currentLayout);
+//                
+                dataWasChanged = false;
+                
+                    loadingStage.close();
+
+                }
+            });
+
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     
