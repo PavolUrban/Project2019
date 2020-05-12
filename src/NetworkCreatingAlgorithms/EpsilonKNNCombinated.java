@@ -47,6 +47,7 @@ public class EpsilonKNNCombinated {
         
         int edgeId = 0;
         int idToDel = 0;
+        double maxDistance = 0.0;
         for(Vertex v1 : vertices)
         {
             System.out.println("Pracujem na "+idToDel);
@@ -66,6 +67,12 @@ public class EpsilonKNNCombinated {
                         v1.neighoursIdsAndDistances.put(v2Index, distance);
                         Edge e = new Edge(edgeId, distance);
                         graph.addEdge(e, v1, v2);
+                    }
+                    
+                    //for slider max value
+                    if(distance > maxDistance)
+                    {
+                        maxDistance = distance;
                     }
                   
                 }
@@ -124,9 +131,10 @@ public class EpsilonKNNCombinated {
             }        
         }
         
-              ZonedDateTime endTime = ZonedDateTime.now();
-
-Duration duration = Duration.between(startTime, endTime);
+        
+        UserSettings.maxSliderValue = maxDistance;
+        ZonedDateTime endTime = ZonedDateTime.now();
+        Duration duration = Duration.between(startTime, endTime);
         
         System.out.println("pocet uzlov "+ graph.getVertexCount()+ " a epsilon bol "+ epsilon);
         System.out.println("pocet hran "+ graph.getEdgeCount());

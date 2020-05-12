@@ -17,5 +17,5 @@ import java.util.List;
 public class ToMove {
     public static List<ChosenRecords> chosenRecords;
     public static String header;
-    public static List<Headers> headers;
+    public static List<Headers> headers = new ArrayList<>();
 }

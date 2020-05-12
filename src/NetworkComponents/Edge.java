@@ -12,6 +12,7 @@ package NetworkComponents;
 public class Edge implements Comparable<Edge>{
     private int id;
     private double weight;
+    private boolean isInSample;
     
     public Edge(int id){
         this.id = id;
@@ -27,9 +28,19 @@ public class Edge implements Comparable<Edge>{
         return this.id;
     }
     
+    public boolean getIsInSample()
+    {
+        return this.isInSample;
+    }
+    
     public double getWeight()
     {
         return this.weight;
+    }
+    
+    public void setIsInSample(boolean isInSample)
+    {
+        this.isInSample = isInSample;
     }
 
     @Override

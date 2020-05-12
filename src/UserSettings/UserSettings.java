@@ -26,13 +26,14 @@ public class UserSettings {
    
     //attributes for vertices colorization
     public static String colorizeByAttribute = "Žiadne";
+    public static int colorizeByIndex = -1;
     public static Map<String, Integer> mapAliasingForColorization = new HashMap<>();
     
     
     public static Collection<Vertex> listOfSavedVertices;
     public static Graph<Vertex, Edge> savedNetwork = null;
     
-    public static double maxSliderValue = 0.0;
+    public static double maxSliderValue = 5.0;
     
     //property used if user wants use non-numeric attribute for network creation
     public static boolean hasNonNumericProperty = false;
@@ -44,7 +45,14 @@ public class UserSettings {
     public static boolean hasHeader = true;
     
     
+    public static boolean attributesBoxWasInitialized = false;
+    
     //max-similarities for LRNET
     public static List<Double> maxSimilarities = new ArrayList();
     
+    public static int minDegree = 1000;
+    public static int maxDegree = -1;
+    
+    
+    public static double sampleSize = 0.15;
 }

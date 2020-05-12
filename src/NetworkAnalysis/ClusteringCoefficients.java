@@ -25,7 +25,7 @@ public class ClusteringCoefficients {
     }
     
    
-    public void count() {
+    public double count() {
         Map<Vertex, Double> map = edu.uci.ics.jung.algorithms.metrics.Metrics.clusteringCoefficients(network);
         results = new ArrayList<>();
         
@@ -37,7 +37,8 @@ public class ClusteringCoefficients {
             results.add(new Pair(v, map.get(v)));
         }
         
-        System.out.println("Vsetko dokopy je "+allTogether+" globalny clustering je"+(allTogether/network.getVertexCount()));
+        
+        return allTogether/network.getVertexCount();
     }
     
     

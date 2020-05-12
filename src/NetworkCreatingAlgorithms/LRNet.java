@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package NetworkCreatingAlgorithms;
 
 import DataPreparation.ChosenRecords;
@@ -187,7 +182,7 @@ public class LRNet
             int indexV2 = 0;
             for(Vertex v2 : vertices)
             {
-                similarityMatrix[indexV1][indexV2] = Distances.countRBF(v1.getValuesOfProps(), v2.getValuesOfProps());
+                similarityMatrix[indexV1][indexV2] = countRBF(v1.getValuesOfProps(), v2.getValuesOfProps());
                 indexV2++;
             }
            
@@ -199,7 +194,7 @@ public class LRNet
     
     
     //add parameter min neighbours
-    public Graph<Vertex, Edge> createLRNetwork(List<ChosenRecords> lines, double epsilon) throws FileNotFoundException
+    public Graph<Vertex, Edge> createLRNetwork(List<ChosenRecords> lines) throws FileNotFoundException
     {         
         //to avoid out of bounds exception when network is created repeatedly by LRNet method
         UserSettings.maxSimilarities.clear();
@@ -251,11 +246,32 @@ public class LRNet
 
 Duration duration = Duration.between(startTime, endTime);
         
-        System.out.println("pocet uzlov "+ graph.getVertexCount()+ " a epsilon bol "+ epsilon);
+        System.out.println("pocet uzlov "+ graph.getVertexCount());
         System.out.println("pocet hran "+ graph.getEdgeCount());
         System.out.println("cas "+ duration.toMillis()+" ms");
        
         
         return graph;
+    }
+    
+    
+    public static double countRBF(ArrayList<Double> values1, ArrayList<Double> values2)
+    {
+        double sum = 0.0;
+        
+        for (int x=0; x<values1.size(); x++)
+        {
+            
+            sum += Math.pow(values1.get(x)-values2.get(x),2);
+        }
+        
+        //lambda = 1/2o^2 -- TODO o should be dynamically set now it is 1 by default
+       //double finalResult = Math.exp(- (sum / lambda));
+       //double lambda = 1/(Math.pow(2*1, 2));
+        
+       //1- .. it is used to transform similarity to distance 
+       double finalResult = Math.exp(-1 * sum); //lambda's behavior is like it is set to 1
+       
+        return finalResult;
     }
 }

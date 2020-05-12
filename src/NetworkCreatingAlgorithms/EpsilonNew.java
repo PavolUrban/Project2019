@@ -53,12 +53,9 @@ public class EpsilonNew {
         int edgeId = 0;
         double maxDistance = 0.0;
         
-        int toDeleteIndex = 0;
         //add edges
         for(Vertex v1 : vertices)
         {
-            System.out.println("Computing "+toDeleteIndex);
-            toDeleteIndex++;
             for(Vertex v2 : vertices)
             {
                 if(v1.getId() != v2.getId()) //self-loops dissalowed
@@ -84,7 +81,7 @@ public class EpsilonNew {
         
         ZonedDateTime endTime = ZonedDateTime.now();
 
-Duration duration = Duration.between(startTime, endTime);
+        Duration duration = Duration.between(startTime, endTime);
         
         System.out.println("pocet uzlov "+ graph.getVertexCount()+ " a epsilon bol "+ epsilon);
         System.out.println("pocet hran "+ graph.getEdgeCount());

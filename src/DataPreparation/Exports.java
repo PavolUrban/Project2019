@@ -9,13 +9,18 @@ import GUI.AlertsWindows;
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
 import UserSettings.ToMove;
+import UserSettings.UserSettings;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.Pair;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -26,6 +31,41 @@ import javafx.stage.Stage;
 public class Exports 
 {
     
+     static List<Color> colors = new ArrayList(Arrays.asList( Color.AQUA,Color.CORAL, Color.SPRINGGREEN,Color.YELLOW , Color.BURLYWOOD,
+                                                     Color.DARKSEAGREEN, Color.SILVER,Color.CHARTREUSE,Color.BLUE , Color.BLUEVIOLET,
+                                                     Color.CADETBLUE, Color.FUCHSIA, Color.DARKORANGE, Color.KHAKI,Color.PINK,
+                                                     Color.ROSYBROWN,Color.BROWN,  Color.BLACK, Color.AZURE, Color.BLANCHEDALMOND));
+    
+    
+     public static void colorizePointsProperly(Graph<Vertex, Edge> network)
+    {
+        System.out.println("Colorize called!");
+        for (Vertex v : network.getVertices()) 
+        {
+            if(UserSettings.colorizeByAttribute.equalsIgnoreCase("Žiadne"))
+            {
+                v.setColor(Color.CORAL);
+            }
+            
+            else //point will be colorized by one of the attributes
+            {
+                if(v.clusterId > colors.size() - 1) // - 1 because of indexing
+                {
+                    v.setColor(Color.CORAL); 
+                }
+                   
+                else
+                {
+                    v.setColor(colors.get(v.clusterId));
+                }
+                
+            }
+            
+        }
+    }
+    
+    
+    //GDF format
      public static void saveNetworkAsConnectedVerticesList(Stage stage, Graph<Vertex, Edge> network) 
      {
          
@@ -36,6 +76,8 @@ public class Exports
         
         else
         {
+            
+            colorizePointsProperly(network);
             BufferedWriter bw = null;
             FileWriter fw = null;
             FileChooser fileChooser = new FileChooser();
@@ -55,20 +97,24 @@ public class Exports
                     fw.write("\n");
                     
                     for(Vertex v : network.getVertices())
-                    {
-                        String color = "";
+                    {   
+                        Color color;
                         
-                        if(v.getClassName().equalsIgnoreCase("Leptodactylidae"))
-                            color = "'255,255,0'"; //yellow
-                        else if (v.getClassName().equalsIgnoreCase("Dendrobatidae"))
-                            color = "'51,51,255'"; //blue
-                        else if(v.getClassName().equalsIgnoreCase("Hylidae"))
-                            color = "'0,0,0'"; //black
-                        else //Bufonidae
-                            color = "'255,0,0'"; //red
-                            
+                        if(v.getColor() != null)
+                        {
+                            color = v.getColor();
+                        }
                         
-                        fw.write(v.getId()+ "," + color);
+                        else
+                        {
+                            color = Color.BLACK;
+                        }
+                        
+                        
+                        String r = ""+(int)( color.getRed() * 255 );
+                        String g = ""+(int)( color.getGreen() * 255 );
+                        String b = ""+(int)( color.getBlue() * 255 );
+                        fw.write(v.getId()+ "," + "'" + r + "," + g + "," + b + "'");
                         fw.write("\n");
                     }
                     
@@ -107,9 +153,70 @@ public class Exports
     }
      
      
-     public static void saveNetworkAsConnectedVerticesList(Stage stage) 
+     public static void saveAsAdjacencyList(Stage stage, Graph<Vertex, Edge> network)
      {
-         System.out.println("Saving children and their attributes ");
+        if(network == null)
+        {
+            AlertsWindows.displayAlert("Žiadna sieť na uloženie");
+        }
+        
+        else
+        {
+            BufferedWriter bw = null;
+            FileWriter fw = null;
+            FileChooser fileChooser = new FileChooser();
+
+            //Set extension filter
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV", ".csv");;
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            //Show save file dialog
+            File file = fileChooser.showSaveDialog(stage);
+
+            if (file != null) {
+                try {
+                    fw = new FileWriter(file, true);                  
+               
+                    for(Edge e: network.getEdges())
+                    {
+                        Pair<Vertex> p = network.getEndpoints(e);
+                        Vertex v = p.getFirst();
+                        Vertex v2 = p.getSecond();
+                        String firstVertex = String.valueOf(v.getId());
+                        String secondVertex = String.valueOf(v2.getId());
+
+                        fw.write(firstVertex+","+secondVertex);
+                        fw.write("\n");
+                    }
+  
+                } catch (IOException ex) {
+                    //Logger.getLogger(JavaFX_DrawOnCanvas.class.getName()).log(Level.SEVERE, null, ex);
+                } finally {
+                    try {
+                        if (bw != null) {
+                            bw.close();
+                        }
+
+                        if (fw != null) {
+                            fw.close();
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
+     }
+     
+     
+     public static void saveNetworkAsConnectedVerticesList(Stage stage) 
+    {
+        if(ToMove.headers.size() == 0)
+        {
+            AlertsWindows.displayAlert("Žiadna dáta na uloženie. Najskôr, prosím, vytvorte sieť.");
+        }
+        else
+        {
             BufferedWriter bw = null;
             FileWriter fw = null;
             FileChooser fileChooser = new FileChooser();
@@ -163,6 +270,8 @@ public class Exports
                     }
                 }
             }
+        }
+            
     }
      
 }

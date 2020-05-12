@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -45,6 +46,12 @@ public class Vertex {
 
     private String className="";
     
+    private Color color;
+    
+    private boolean isInSample = false;
+
+    private int degree;
+    
     public Vertex(int id) {
         this(id, "");
         
@@ -70,6 +77,11 @@ public class Vertex {
         return id;
     }
     
+    public int getDegree()
+    {
+        return this.degree;
+    }
+    
     public List<Double> getAllSimilarities()
     {
         return this.allSimilarities;
@@ -80,9 +92,19 @@ public class Vertex {
         return this.indexInVerticesArray;
     }
     
+    public boolean getIsInSample()
+    {
+        return this.isInSample;
+    }
+    
     public int getLocalDegree()
     {
         return this.localDegree;
+    }
+    
+    public Color getColor()
+    {
+        return this.color;
     }
     
     public String getClassName()
@@ -120,6 +142,8 @@ public class Vertex {
     public double getSize() {
         return size;
     }
+    
+    
 
     public double getRevValue() {
         return revValue;
@@ -136,9 +160,24 @@ public class Vertex {
     public void setPositionY(double positionY) {
         this.positionY = positionY;
     }
+    
+    public void setColor(Color color)
+    {
+        this.color = color;
+    }
 
+    
+    public void setDegree(int degree)
+    {
+        this.degree = degree;
+    }
     public void setSize(double size) {
         this.size = size;
+    }
+    
+    public void setIsInSample(boolean isInSample)
+    {
+        this.isInSample = isInSample;
     }
     
     public void setKValue(double kValue)

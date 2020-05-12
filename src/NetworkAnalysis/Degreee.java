@@ -7,6 +7,7 @@ package NetworkAnalysis;
 
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
+import UserSettings.UserSettings;
 import edu.uci.ics.jung.graph.Graph;
 import java.util.ArrayList;
 import javafx.util.Pair;
@@ -28,7 +29,18 @@ public class Degreee {
     public void count() {
         scores = new ArrayList<>();
         for(Vertex v : network.getVertices()){
-            scores.add(new Pair(v, (double)network.getOutEdges(v).size()));
+            
+            int degree = network.getOutEdges(v).size() / 2;
+            
+            if(degree < UserSettings.minDegree)
+                UserSettings.minDegree = degree;
+            
+            if(degree > UserSettings.maxDegree)
+                UserSettings.maxDegree = degree;
+            
+            
+            v.setDegree(degree);
+            scores.add(new Pair(v, (double)degree));
         }
     }
      

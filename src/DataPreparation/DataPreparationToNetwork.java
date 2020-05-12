@@ -45,7 +45,9 @@ public class DataPreparationToNetwork {
     {   
         File file = new File(UserSettings.pathToDataset); 
         List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8); 
-        lines.remove(0); //remove header
+        
+        if(UserSettings.hasHeader)
+            lines.remove(0); //remove header
         
         //TODO
         if(filterYear == true || filterSex == true || filterRegion == true || filterGrade == true ||filterSchool == true)
@@ -87,7 +89,7 @@ public class DataPreparationToNetwork {
             else if(methodOfNetworkCreation == 4)
             {
                 LRNet lrnet = new LRNet();
-                network = lrnet.createLRNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), Epsilon);
+                network = lrnet.createLRNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized));
             }
             
         }
@@ -240,7 +242,7 @@ public class DataPreparationToNetwork {
         
         for(String line : lines)
         {
-            //todo remove this cycle
+            //todo remove this condition
 //            if(id>151)
 //            {
 //                break;
@@ -264,8 +266,18 @@ public class DataPreparationToNetwork {
             else
                 cr = new ChosenRecords(id);
                 
+            
+            
+        
             for(Headers h : headers)
             {
+                if(array.length <= h.getId())
+                {
+                    hasEmptyProperty = true;
+                    break;
+                }
+                    
+                
                 if(array[h.getId()].equalsIgnoreCase("") || array[h.getId()]==null || array[h.getId()].isEmpty()) 
                 {
                     hasEmptyProperty = true;
@@ -296,7 +308,16 @@ public class DataPreparationToNetwork {
             if(!hasEmptyProperty)
             {
                 //TODO add class name dynamically 
-                cr.className = array[4];
+                
+                
+                
+           
+                if(UserSettings.colorizeByIndex != -1)
+                {
+                    cr.className = array[UserSettings.colorizeByIndex];
+                    
+                }
+                                
                 
                 if(!UserSettings.mapAliasingForColorization.containsKey(cr.className))
                 {
@@ -304,6 +325,7 @@ public class DataPreparationToNetwork {
                     aliasingIndex++;
                 }
                 
+              
                 chosenRecords.add(cr);
             }
             

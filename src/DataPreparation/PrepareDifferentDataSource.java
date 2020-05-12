@@ -34,6 +34,31 @@ public class PrepareDifferentDataSource {
         return createHBox(headers);
     }
     
+    
+    public static int getNumberOfAttributes(String path) throws FileNotFoundException
+    {
+        String[] tempArray;
+        Scanner scanner = new Scanner(new File(path));
+        
+        scanner.useDelimiter("\n");
+        int counter=0;
+        while(scanner.hasNext())
+        {
+           if(counter>0) //to first row
+               break;
+          
+          
+           String record = scanner.next();
+           
+          
+           tempArray = record.split(UserSettings.separator);
+           
+           return tempArray.length;
+        }
+       
+        return -1;
+    }
+    
     public static ArrayList<Headers> getHeaders(String path) throws FileNotFoundException
     {
         ArrayList<Headers> namesForSelectHeaders = new ArrayList<>();

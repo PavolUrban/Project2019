@@ -63,12 +63,7 @@ public class NetworkByTopEdges {
         ArrayList<Edge> sortedEdges = new ArrayList<>(allPossibleEdges);
        
         Collections.sort(sortedEdges);
-        
-        for(Edge e: sortedEdges)
-        {
-            System.out.println(e.getId() + " "+ e.getWeight());
-        }
-   
+
         
         
         

@@ -27,7 +27,7 @@ public class NetworkDrawer {
     static List<Color> colors = new ArrayList(Arrays.asList(Color.CORAL, Color.AQUA,Color.SPRINGGREEN,Color.YELLOW , Color.BURLYWOOD,
                                                      Color.DARKSEAGREEN, Color.SILVER,Color.CHARTREUSE,Color.BLUE , Color.BLUEVIOLET,
                                                      Color.CADETBLUE, Color.FUCHSIA, Color.DARKORANGE, Color.KHAKI,Color.PINK,
-                                                     Color.ROSYBROWN,Color.BROWN,  Color.BLACK));
+                                                     Color.ROSYBROWN,Color.BROWN,  Color.BLACK, Color.AZURE, Color.BLANCHEDALMOND));
     
     
      private static void drawEdge(GraphicsContext gc, double fromX, double fromY, double toX, double toY, double edgeWidth, Color color) {
@@ -88,20 +88,43 @@ public class NetworkDrawer {
             drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), Math.pow(normalizedEdgeWeight, 3), Color.BLACK);
         }             
          
-        
+        colorizePointsProperly(gc, network);
+    }
+    
+    
+    public static void colorizePointsProperly(GraphicsContext gc, Graph<Vertex, Edge> network)
+    {
         for (Vertex v : network.getVertices()) 
         {
-            if(v.clusterId > colors.size() - 1) // - 1 because of indexing
-                drawVertex(gc, v, Color.CORAL, false); //skontrolovat ci je spravne
+            if(UserSettings.colorizeByAttribute.equalsIgnoreCase("Žiadne"))
+            {
+               
+                v.setColor(Color.CORAL);
+                drawVertex(gc, v, Color.CORAL, false);
+            }
             
-            else
-                drawVertex(gc, v, colors.get(v.clusterId), false);
+            else //point will be colorized by one of the attributes
+            {
+                if(v.clusterId > colors.size() - 1) // - 1 because of indexing
+                {
+                    v.setColor(Color.CORAL);
+                    drawVertex(gc, v, Color.CORAL, false); 
+                }
+                   
+                else
+                {
+                    v.setColor(colors.get(v.clusterId));
+                    drawVertex(gc, v, colors.get(v.clusterId), false);
+                }
+                
+            }
+            
         }
     }
     
+    
     public static void redrawNetwork(Graph<Vertex, Edge> network, Canvas canvas1)
     {
-        System.out.println("Teraz sa vola redraw");
         GraphicsContext gc = canvas1.getGraphicsContext2D();
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.BLACK);
@@ -115,7 +138,7 @@ public class NetworkDrawer {
 
         Collection<Vertex> oldVertices = UserSettings.savedNetwork.getVertices();
         
-        System.out.println("V starej sieti bolo tolkoto hran "+UserSettings.savedNetwork.getEdgeCount()+" vs v novej "+network.getEdgeCount());
+        //System.out.println("V starej sieti bolo tolkoto hran "+UserSettings.savedNetwork.getEdgeCount()+" vs v novej "+network.getEdgeCount());
         for (Edge e : network.getEdges()) 
         {
             Pair<Vertex> p = network.getEndpoints(e);
@@ -150,15 +173,7 @@ public class NetworkDrawer {
             drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), Math.pow(normalizedEdgeWeight, 3), Color.BLACK);
         }             
                    
-        for (Vertex v : network.getVertices()) 
-        {
-            
-             if(v.clusterId > colors.size() - 1) // - 1 because of indexing
-                drawVertex(gc, v, Color.CORAL, true); //skontrolovat ci je spravne
-            
-            else
-                drawVertex(gc, v, colors.get(v.clusterId), true); //skontrolovat ci je spravne
-        }  
+        colorizePointsProperly(gc, network);
     }
     
 }

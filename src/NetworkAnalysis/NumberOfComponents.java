@@ -44,7 +44,6 @@ public class NumberOfComponents {
                 for(Vertex v : test)
                 {
                     v.clusterId = counter;
-                    System.out.println(v.clusterId);
                 }
             
             counter++;

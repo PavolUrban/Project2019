@@ -20,6 +20,7 @@ import static GUI.CustomDataSourceSettingsView.chooseFile;
 import static GUI.CustomDataSourceSettingsView.modifyMainPage;
 import GUI.Design;
 import GUI.MyAlerts;
+import GUI.MyChartMaker;
 import GUI.NetworkDrawer;
 import GUI.SimpleNetworkProperties;
 import GUI.UserSettingsWindow;
@@ -31,6 +32,9 @@ import Layouts.LayoutKK;
 import NetworkAnalysis.*;
 import NetworkComponents.Edge;
 import NetworkComponents.Vertex;
+import Sampling.RandomDegreeNode;
+import Sampling.RandomEdge;
+import Sampling.RandomNode;
 import UserSettings.UserSettings;
 import edu.uci.ics.jung.algorithms.shortestpath.DistanceStatistics;
 import edu.uci.ics.jung.graph.Graph;
@@ -47,6 +51,7 @@ import java.util.Map;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -219,6 +224,100 @@ public class Project2019 extends Application {
     
     
     
+    public void samplingDialog(Stage stage, int samplingMethod)
+    {
+        StackPane secondaryLayout = new StackPane();
+        Scene secondScene = new Scene(secondaryLayout, 400, 400);
+ 
+         
+        TextField textFieldSampleSize = new TextField();
+        
+        Label label = new Label("Nastavte prosím veľkosť vzorky od 0 do 1, kde 1 = 100%");
+       
+        Button buttonRun = new Button ("Spustiť sampling");
+        Stage newWindow;
+        
+        // New window (Stage)
+        newWindow = new Stage();
+        newWindow.setTitle("Vzorkovanie");
+        newWindow.setScene(secondScene);
+
+        // Set position of second window, related to primary window.
+        newWindow.setX(stage.getX() + 200);
+        newWindow.setY(stage.getY() + 100);
+
+        newWindow.show();   
+        
+        
+        
+        buttonRun.setOnAction((event) -> {
+    
+            if(Double.parseDouble(textFieldSampleSize.getText().toString()) > 1.0)
+            {
+                AlertsWindows.displayAlert("Maximálna hodnota je 1.0");
+            }
+            
+            else
+            {
+                double sampleSize = Double.parseDouble(textFieldSampleSize.getText().toString());
+                //random node
+                if(samplingMethod == 0)
+                {
+                    RandomNode rn = new RandomNode(network);
+                    rn.run(sampleSize);
+                }
+                    
+                else if( samplingMethod == 1)
+                {
+                    RandomEdge re = new RandomEdge(network);
+                    re.run(sampleSize);
+                }
+                
+                //random degree node 
+                else if(samplingMethod == 2)
+                {
+                    RandomDegreeNode rdn = new RandomDegreeNode(network);
+                    rdn.run(sampleSize);
+                }
+                
+                setBasicNetworkCharacteristics();
+                runLayoutOrDisplayWarning(currentLayout);
+            
+            }
+        });          
+        
+        
+
+
+        Pattern pattern = Pattern.compile("\\d*|\\d+\\.\\d*");
+        TextFormatter formatter = new TextFormatter((UnaryOperator<TextFormatter.Change>) change -> {
+            return pattern.matcher(change.getControlNewText()).matches() ? change : null;
+        });
+
+        textFieldSampleSize.setTextFormatter(formatter);
+        
+        GridPane grid = new GridPane();
+        grid.setVgap(4);
+        grid.setHgap(10);
+        grid.setPadding(new Insets(5, 5, 5, 5));
+
+
+        //element, column, row
+        grid.add(label, 0, 0);
+        grid.add(textFieldSampleSize, 0, 1);
+        
+             
+        grid.setAlignment(Pos.CENTER);
+         final VBox vboxCustomSource = new VBox();
+        vboxCustomSource.setSpacing(5);
+        //vbox.setPadding(new Insets(30, 0, 0, Design.canvasWidth + 50)); //TODO dynamicky posledne bolo 930
+        vboxCustomSource.getChildren().addAll(buttonRun, grid);
+        vboxCustomSource.setAlignment(Pos.CENTER);
+        
+        secondaryLayout.getChildren().addAll(vboxCustomSource);  
+    
+    }
+    
     
     public void openNewDataSourceWindow(Stage stage)
     {
@@ -306,19 +405,64 @@ public class Project2019 extends Application {
                 
                 ArrayList<Headers> headers = new ArrayList();
                 try {
-                    headers = PrepareDifferentDataSource.getHeaders(UserSettings.pathToDataset);
+                    
+                    if(UserSettings.hasHeader)
+                    {
+                        headers = PrepareDifferentDataSource.getHeaders(UserSettings.pathToDataset);
+
+                        choicesColorizeByAttribute.getItems().clear(); //reset
+
+                        choicesColorizeByAttribute.getItems().add("Žiadne");
+                        choicesColorizeByAttribute.getItems().add("Podľa príslušnosti ku komponente");
+
+                        for(Headers h : headers)
+                        {
+                            choicesColorizeByAttribute.getItems().add(h.getHeaderName());
+                        }
+
+                        choicesColorizeByAttribute.getSelectionModel().selectFirst();
+                    }
+                    
+                    else
+                    {
+                        int numberOfAtributes = PrepareDifferentDataSource.getNumberOfAttributes(UserSettings.pathToDataset);
+                        
+                        choicesColorizeByAttribute.getItems().clear(); //reset
+
+                        choicesColorizeByAttribute.getItems().add("Žiadne");
+                        choicesColorizeByAttribute.getItems().add("Podľa príslušnosti ku komponente");
+                        
+                        for(int i = 0; i < numberOfAtributes; i++)
+                        {
+                            choicesColorizeByAttribute.getItems().add("Atribút "+i);
+                            Headers newHeader = new Headers("Atribút "+i, i);
+                            headers.add(newHeader);
+                        }
+                        
+                        choicesColorizeByAttribute.getSelectionModel().selectFirst();
+                    }
+                    
                 } catch (FileNotFoundException ex) {
                     Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 HBox a = new HBox();
                 try {
                     a = somethin("Atribúty", 0 , 0, headers);
+                    
+                    
                 } catch (FileNotFoundException ex) {
                     Logger.getLogger(Project2019.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 
                 
                 selectedHeaders.clear();
+                
+                if(UserSettings.attributesBoxWasInitialized)
+                    vbox.getChildren().remove(0);
+                
+                else
+                    UserSettings.attributesBoxWasInitialized = true;
+                
                 vbox.getChildren().add(0,a);
           
                 
@@ -612,25 +756,32 @@ public class Project2019 extends Application {
             Platform.exit();
         });
 
-        MenuItem saveAsNetwork = new MenuItem("Uložiť sieť", null);
+        MenuItem saveAsNetwork = new MenuItem("Uložiť sieť ako GDF", null);
         saveAsNetwork.setMnemonicParsing(true);
         saveAsNetwork.setOnAction((event) -> {
             Exports.saveNetworkAsConnectedVerticesList(copyOfPrimaryStage, network);
         });
         
-        MenuItem saveAsChosenRecords = new MenuItem("Uložiť sieť 2", null);
+        MenuItem saveAsChosenRecords = new MenuItem("Uložiť vybrané vektorové dáta", null);
         saveAsChosenRecords.setMnemonicParsing(true);
         saveAsChosenRecords.setOnAction((event) -> {
             Exports.saveNetworkAsConnectedVerticesList(copyOfPrimaryStage);
         });
         
         
+        
+        MenuItem saveAsAdjacencyList = new MenuItem("Uložiť sieť ako zoznam hrán", null);
+        saveAsAdjacencyList.setMnemonicParsing(true);
+        saveAsAdjacencyList.setOnAction((event) -> {
+            Exports.saveAsAdjacencyList(copyOfPrimaryStage, network);
+        });
+        
         MenuItem chooseDataFile = new MenuItem("Načítať dátový súbor");
         chooseDataFile.setOnAction((event) -> {
             openNewDataSourceWindow(copyOfPrimaryStage);          
         });
         
-        menu2.getItems().addAll(exitItem, saveAsNetwork, saveAsChosenRecords, chooseDataFile);
+        menu2.getItems().addAll(exitItem, saveAsNetwork, saveAsChosenRecords,saveAsAdjacencyList, chooseDataFile);
         
         Menu menuLayouts = new Menu("Layouty");
         MenuItem itemISOMLayout = new MenuItem("ISOM Layout");
@@ -691,6 +842,46 @@ public class Project2019 extends Application {
         });
         
         chartAnalysis.getItems().addAll(betweeness, closeness, degree, degreeCentrality);
+     
+        Menu sampling = new Menu("Vzorkovanie");
+        
+        MenuItem randomNode = new MenuItem("Random node");
+        randomNode.setOnAction((event) -> {
+            
+            if(network != null)
+            {
+                samplingDialog(copyOfPrimaryStage, 0);
+            }
+            
+            else 
+                AlertsWindows.displayAlert("Najskôr vytvorte sieť, prosím.");
+        });
+        
+        MenuItem randomEdge = new MenuItem("Random edge");
+        randomEdge.setOnAction((event) -> {
+            if(network != null)
+            {
+                samplingDialog(copyOfPrimaryStage, 1);
+            }
+            
+            else 
+                AlertsWindows.displayAlert("Najskôr vytvorte sieť, prosím.");
+            
+        });
+        
+        MenuItem randomDegreeNode = new MenuItem("Random degree node");
+        randomDegreeNode.setOnAction((event) -> {
+            if(network != null)
+            {
+                  samplingDialog(copyOfPrimaryStage, 2);
+            }
+            
+            else 
+                AlertsWindows.displayAlert("Najskôr vytvorte sieť, prosím.");
+        });
+        
+        
+        sampling.getItems().addAll(randomNode,randomDegreeNode, randomEdge);
         
         Menu statistics = new Menu("Analýza siete");
         
@@ -708,8 +899,18 @@ public class Project2019 extends Application {
         
         MenuItem globalClustCoeff = new MenuItem("Globálny zhlukovací koeficient");
         globalClustCoeff.setOnAction((event) -> {
-          SimpleNetworkProperties snp = new SimpleNetworkProperties();
-          snp.getClusteringCoefficient(network);
+//          SimpleNetworkProperties snp = new SimpleNetworkProperties();
+//          snp.getClusteringCoefficient(network);
+   
+            if(network != null)
+            {
+                MyChartMaker mcm = new MyChartMaker();
+                mcm.createChart(network);
+            }
+            
+            else
+                AlertsWindows.displayAlert("Najskôr, prosím, vytvorte sieť.");
+            
         });
         
         MenuItem density = new MenuItem("Hustota siete");
@@ -719,24 +920,28 @@ public class Project2019 extends Application {
         });
            
         
-        MenuItem avgCloseness = new MenuItem("Priemerná closeness centralita");
-        avgCloseness.setOnAction((event) -> {
-           Closennes c = new Closennes(network);
-            c.count();
-        });
+    
         
-        MenuItem avgBetween = new MenuItem("Priemerná betweeness centralita");
-        avgBetween.setOnAction((event) -> {
-          Betweenness b = new Betweenness(network);
-          b.count();
-        });
-        
-        statistics.getItems().addAll(avgDegree,diamter, globalClustCoeff,density, avgCloseness, avgBetween);
+        statistics.getItems().addAll(avgDegree,diamter, globalClustCoeff,density);
        
-        mainMenu.getMenus().addAll( menu2, menuLayouts, statistics, chartAnalysis); //menuCentralities
+        mainMenu.getMenus().addAll( menu2, menuLayouts, statistics, chartAnalysis, sampling); //menuCentralities
 
         return mainMenu;
     }
+     
+     
+    private void setBasicNetworkCharacteristics()
+    {
+        double maxNumberOfEdges = (network.getVertexCount()*(network.getVertexCount()-1.0))/2.0;
+        double percentilOfEdges = (network.getEdgeCount()/maxNumberOfEdges)*100;
+        numberOfVertices.setText("Uzly: "+network.getVertexCount());
+        NumberOfComponents noc = new NumberOfComponents(network);
+        numberOfComponents.setText("Komponenty "+ noc.getNumberOfComponents());
+        double roundedPercentil = (double) Math.round(percentilOfEdges * 100) / 100;
+        numberOfEdges.setText("Hrany: "+network.getEdgeCount()+ " ("+ roundedPercentil + "%)");
+        sliderValue.setText(slider.getValue()+"");
+    }
+     
      
      private ChoiceBox createChoiceBox(String label, List<String> choices)
      {
@@ -872,125 +1077,6 @@ public class Project2019 extends Application {
     }
     
     
-    public void chooseFile() throws FileNotFoundException, IOException {
-        JFileChooser chooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
-        chooser.setFileFilter(filter);
-        chooser.setMultiSelectionEnabled(false);
-        // Show the dialog; wait until dialog is closed
-        int returnVal = chooser.showOpenDialog(null);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            // Retrieve the selected files.
-           pathToFile = chooser.getSelectedFile().toString();
-        
-           vbox.getChildren().remove(filtersGridTitlePane);
-           vbox.getChildren().remove(eatingHabbits);
-           
-         ArrayList<Headers> headers = PrepareDifferentDataSource.getHeaders(pathToFile);
-         HBox a =  somethin("Atribúty", 0 , 0, headers);
-         selectedHeaders.clear();
-         vbox.getChildren().add(0,a);
-         NEWPreprocessing.getRelevantRecords(pathToFile, headers, false);
-        }
-    }
-    
-  
-     
-     public HBox createHbox(String label, ChoiceBox locationchoiceBox)
-     { 
-        final ToggleGroup group = new ToggleGroup();
-        RadioButton buttonFilterYes = new RadioButton("Áno");
-        buttonFilterYes.setToggleGroup(group);
-        buttonFilterYes.setUserData("Áno");
-
-        RadioButton buttonFilterNo = new RadioButton("Nie");
-        buttonFilterNo.setToggleGroup(group);
-        buttonFilterNo.setUserData("Nie"); 
-        buttonFilterNo.setSelected(true);
-       
-        final HBox HBOXfilterBySex = new HBox();
-        Text labelFilterBySex = new Text(label); 
-        HBOXfilterBySex.setMinWidth(Design.minTableWidth);
-        HBOXfilterBySex.setSpacing(25);
-
-        HBOXfilterBySex.getChildren().addAll(labelFilterBySex,buttonFilterYes, buttonFilterNo, locationchoiceBox); //todo add group?
-          
-        group.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
-            public void changed(ObservableValue<? extends Toggle> ov,
-                    Toggle old_toggle, Toggle new_toggle) {
-                if (group.getSelectedToggle() != null) {
-                    if (group.getSelectedToggle() == buttonFilterYes) {
-                        
-                        locationchoiceBox.setDisable(false);
-               
-                        if(label==filterBySexText)
-                        {
-                            filterBySex = true;
-                            System.out.println("Filter by Sex changed to "+filterBySex);
-                        }
-                        else if(label==filterByYearText)
-                        {
-                            filterByYear = true;
-                            System.out.println("Filter by Year changed to "+filterByYear);
-                        }
-                        else if(label == filterByRegionText)
-                        {
-                            filterByRegion = true;
-                            System.out.println("Filter by Region changed to "+filterByRegion);
-                        }
-                        
-                        else if(label == filterBySchoolText)
-                        {
-                            filterBySchool = true;
-                            System.out.println("Filter by School changed to "+filterBySchool);
-                        }
-                        
-                        else if(label == filterByGradeText)
-                        {
-                            filterByGrade = true;
-                            System.out.println("Filter by Grade changed to "+filterByGrade);
-                        }
-                    }
-                    
-                else if (group.getSelectedToggle() == buttonFilterNo) {
-                    locationchoiceBox.setDisable(true);
-                        if(label==filterBySexText)
-                        {
-                            filterBySex = false;
-                            System.out.println("Filter by Sex changed to "+filterBySex);
-                        }
-                        else if(label==filterByYearText)
-                        {
-                            filterByYear = false;
-                            System.out.println("Filter by Year changed to "+filterByYear);
-                        }
-                        
-                        else if(label == filterByRegionText)
-                        {
-                            filterByRegion = false;
-                            System.out.println("Filter by Region changed to "+filterByRegion);
-                        }
-                        
-                        else if(label == filterBySchoolText)
-                        {
-                            filterBySchool = false;
-                            System.out.println("Filter by School changed to "+filterBySchool);
-                        }
-                        
-                        else if(label == filterByGradeText)
-                        {
-                            filterByGrade = false;
-                            System.out.println("Filter by Grade changed to "+filterByGrade);
-                        }
-                    }
-                }
-
-            }
-        });
-        
-        return HBOXfilterBySex;
-     }
-
     @Override
     public void start(Stage primaryStage) throws FileNotFoundException {
         Rectangle2D screenBounds = Screen.getPrimary().getBounds();
@@ -1008,13 +1094,43 @@ public class Project2019 extends Application {
         choicesNetworkMethodCreation.getSelectionModel().selectFirst();
         choicesEmptyRecords.getSelectionModel().selectLast();
         choicesMetrics.getSelectionModel().selectFirst();
+        
+        
+        
+        choicesMetrics.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+ 
+        @Override
+        public void changed(ObservableValue<? extends Number> observable,
+            Number oldVal, Number newVal) {
+
+       
+            
+            //0- euclidean, 1- cebyshev, 2 - manhattan
+            if((int)newVal == 0 || (int)newVal == 1 || (int)newVal == 2)
+            {
+                slider.setMin(0.0);
+                slider.setMax(UserSettings.maxSliderValue);
+            }   
+            
+            else
+            {
+                slider.setMin(0.0);
+                slider.setMax(1.0);
+            }
+
+            //TODO disable LRNET knn props and so ons
+        }
+    });
+        
+        
+        
         choicesNetworkMethodCreation.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
  
         @Override
         public void changed(ObservableValue<? extends Number> observable,
             Number oldVal, Number newVal) {
 
-            System.out.println(observable.getValue());    
+       
             
             //Epsilon neighbourhood
             if((int)newVal == 0)
@@ -1083,11 +1199,32 @@ public class Project2019 extends Application {
         @Override
         public void changed(ObservableValue<? extends Number> observable,
             Number oldVal, Number newVal) {
+            UserSettings.colorizeByIndex = -1;
+            try
+            {
+                int position = observable.getValue().intValue();
+                UserSettings.colorizeByAttribute = choicesColorizeByAttribute.getItems().get(position).toString();
             
-            int position = observable.getValue().intValue();
-            UserSettings.colorizeByAttribute = choicesColorizeByAttribute.getItems().get(position).toString();
-            
+                if((UserSettings.colorizeByAttribute.equalsIgnoreCase("Žiadne") == false ) && ( UserSettings.colorizeByAttribute.equalsIgnoreCase("Podľa príslušnosti ku komponente") == false))
+                {
+                    for(Headers h: allHeaders)
+                    {
+                        if(h.getHeaderName().equalsIgnoreCase(choicesColorizeByAttribute.getItems().get(position).toString()))
+                        {
+                            UserSettings.colorizeByIndex = h.getId();
+                            break;
+                        }
+                    }
+                }
             }
+            
+            catch(Exception e)
+            {
+                System.out.println(e.getMessage());
+            }
+           
+         }
+           
         });
         
         
@@ -1102,7 +1239,7 @@ public class Project2019 extends Application {
                 public void changed(ObservableValue ov,Boolean old_val, Boolean new_val) {
                         if(new_val)
                         {
-                            if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 0)
+                            if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 0 || choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 1)
                             {
                                 System.out.println("Teraz je " +choicesNetworkMethodCreation.getSelectionModel().getSelectedItem() +"a nastavujem na odmocninu z dimenzie.");
                                 setSliderDefault(slider, true);
@@ -1406,12 +1543,18 @@ public class Project2019 extends Application {
                 
                 numberOfEdges.setText("Hrany: "+network.getEdgeCount()+ " ("+ roundedPercentil + "%)");
                 
-                
+                //euclid, chebyshev and manhattan - assign max possible epsilon value
+                if(choicesMetrics.getSelectionModel().getSelectedIndex() == 0 || choicesMetrics.getSelectionModel().getSelectedIndex() == 1 || choicesMetrics.getSelectionModel().getSelectedIndex() == 2 )
+                {
+                    slider.setMin(0.0);
+                    slider.setMax(UserSettings.maxSliderValue);
+                }    
+                   
                 
                 sliderValue.setText(slider.getValue()+"");
                 System.out.println("******* Idem vykreslit");
-                //TODO here is network created
-                   runLayoutOrDisplayWarning(currentLayout);
+              
+                runLayoutOrDisplayWarning(currentLayout);
                 
                 dataWasChanged = false;
                 

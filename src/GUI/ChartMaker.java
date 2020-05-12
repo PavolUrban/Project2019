@@ -54,12 +54,14 @@ Button saveChartData;
     int chosenCentrality = 1;
     double maximumValue;
     double minimumValue;
+    double avgValue;
     Stage chartStage;
     //XYChart.Series series1;
     BarChart<String, Number> bc;
     ArrayList<Pair<Vertex, Double>> dataToChangeRange;
     Label labelbiggestCentrality = new Label();
     Label labellowestCentrality = new Label();
+    Label labelavgCentrality = new Label();
     Label labelchooseRange = new Label("Choose range for x-axis");
     Button recount ;
 
@@ -87,7 +89,7 @@ Button saveChartData;
 
         // ScrollPane scrollPane = new ScrollPane();
         startTask(network, range, title);
-        recount = new Button("Change!");
+        recount = new Button("Zmeniť!");
 recount.setVisible(false);
         chartStage = new Stage();
         chartStage.setTitle(title);
@@ -96,18 +98,18 @@ recount.setVisible(false);
         bc = new BarChart<String, Number>(xAxis, yAxis);
         if (new String("Closeness centrality").equals(title)) {
             System.out.println("Uvodne porovnanie- ide o closenes");
-            bc.setTitle("Closeness centrality - Vertices summary");
+            bc.setTitle("Closeness centralita");
             rangeValueFromSlider = 0.1;
         } else if (new String("Betweenness centrality").equals(title)) {
-            bc.setTitle("Betweenness centrality - Vertices summary");
+            bc.setTitle("Betweenness centralita");
             rangeValueFromSlider = 5000;
         } else if (new String("Degree").equals(title)) {
             rangeValueFromSlider = 2;
-            bc.setTitle("Degree - Vertices summary");
+            bc.setTitle("Stupeň uzlov");
         } else if (new String("Eigenvector centrality").equals(title)) {
             rangeValueFromSlider = 5;
             bc.setTitle("Eigenvector centrality - Vertices summary");
-        } else if (new String("Degree centrality").equals(title)) {
+        } else if (new String("Degree centralita").equals(title)) {
             rangeValueFromSlider = 0.01;
             bc.setTitle("Degree centrality - Vertices summary");
         }
@@ -116,8 +118,8 @@ recount.setVisible(false);
         bc.setMinHeight(Design.sceneHeight / 2);
         bc.setAnimated(false);
 
-        xAxis.setLabel("Please wait, program is working right now");
-        yAxis.setLabel("Number of vertices");
+        xAxis.setLabel("Počkajte prosím, program beží...");
+        yAxis.setLabel("Počet uzlov");
 
         slider = new Slider();
         slider.setVisible(false);
@@ -138,7 +140,7 @@ recount.setVisible(false);
         });
 
         
-        saveChart = new Button("Save chart as PNG");
+        saveChart = new Button("Uložiť graf ako obrázok");
         saveChart.setVisible(false);
         saveChart.setOnAction((event) -> {
             // Button was clicked, do something...
@@ -147,7 +149,7 @@ recount.setVisible(false);
 
         });
 
-        saveChartData = new Button("Save chart data");
+        saveChartData = new Button("Uložiť dáta z grafu");
         saveChartData.setVisible(false);
         saveChartData.setOnAction((event) -> {
             // Button was clicked, do something...
@@ -182,6 +184,8 @@ recount.setVisible(false);
         labellowestCentrality.setMaxWidth(Region.USE_PREF_SIZE);
         labelbiggestCentrality.setMinWidth(Region.USE_PREF_SIZE);
         labelbiggestCentrality.setMaxWidth(Region.USE_PREF_SIZE);
+        labelavgCentrality.setMinWidth(Region.USE_PREF_SIZE);
+        labelavgCentrality.setMaxWidth(Region.USE_PREF_SIZE);
         labelchooseRange.setMinWidth(Region.USE_PREF_SIZE);
         labelchooseRange.setMaxWidth(Region.USE_PREF_SIZE);
         saveChart.setMinWidth(200);
@@ -193,7 +197,7 @@ recount.setVisible(false);
         leftCornerBox.setPadding(new Insets(20, 0, 0, 720));
         leftCornerBox.setSpacing(5);
         leftCornerBox.getChildren().addAll(saveChart, saveChartData);
-        vbox1.getChildren().addAll(labellowestCentrality, labelbiggestCentrality, labelchooseRange, slider, recount, leftCornerBox);
+        vbox1.getChildren().addAll(labellowestCentrality,labelavgCentrality, labelbiggestCentrality, labelchooseRange, slider, recount, leftCornerBox);
         vbox1.setMaxWidth(500);
         slider.setMaxWidth(500);
         recount.setMaxWidth(500);
@@ -251,6 +255,7 @@ recount.setVisible(false);
             dataToPrint=new ArrayList<>(data);
             double max = data.get(0).getValue();
             double min = data.get(0).getValue();
+            double sum = 0.0;
             for (Pair<Vertex, Double> m : data) {
                 double tmp = m.getValue();
                 double tmp2 = m.getValue();
@@ -261,10 +266,15 @@ recount.setVisible(false);
                 if (tmp2 < min) {
                     min = tmp2;
                 }
+                
+                sum = sum+m.getValue();
             }
 
             maximumValue = max;
             minimumValue = min;
+            
+            avgValue = sum/data.size();
+            
             if ((max - (int) max) != 0) {
                 double numberOfGroups = max / range;
                 int numberOfGroupsInteger = (int) numberOfGroups + 1; //to get nearest upper integer value
@@ -344,9 +354,10 @@ saveChartData.setVisible(true);
                     slider.setVisible(false);
                     recount.setVisible(false);
                     bc.getData().addAll(series1);
-                    labelbiggestCentrality.setText("Biggest value: " + maximumValue);
-                    labellowestCentrality.setText("Lowest value: " + minimumValue);
-                    xAxis.setLabel("Values");
+                    labelbiggestCentrality.setText("Najvyššia hodnota: " + maximumValue);
+                    labellowestCentrality.setText("Najnižšia hodnota: " + minimumValue);
+                    labelavgCentrality.setText("Priemerná hodnota: "+ avgValue);
+                    xAxis.setLabel("Hodnoty");
 
                     /*
                      for (int i = 0; i < series1.getData().size(); i++) {
@@ -396,6 +407,7 @@ saveChartData.setVisible(true);
             dataToPrint=new ArrayList<>(data);
             double max = data.get(0).getValue();
             double min = data.get(0).getValue();
+            double sum = 0.0;
             for (Pair<Vertex, Double> m : data) {
                 double tmp = m.getValue();
                 double tmp2 = m.getValue();
@@ -406,10 +418,15 @@ saveChartData.setVisible(true);
                 if (tmp2 < min) {
                     min = tmp2;
                 }
+                
+                sum = sum + m.getValue();
             }
 
             maximumValue = max;
             minimumValue = min;
+            
+            avgValue = sum/data.size();
+            
             if ((max - (int) max) != 0) {
                 double numberOfGroups = max / range;
                 int numberOfGroupsInteger = (int) numberOfGroups + 1; //to get nearest upper integer value
@@ -517,8 +534,9 @@ recount.setVisible(true);
                     }
                      xAxis.setLabel("Values");
                     bc.getData().addAll(series1);
-                    labelbiggestCentrality.setText("Biggest value: " + maximumValue);
-                    labellowestCentrality.setText("Lowest value: " + minimumValue);
+                    labelbiggestCentrality.setText("Najvyššia hodnota: " + maximumValue);
+                    labellowestCentrality.setText("Najnižšia hodnota: " + minimumValue);
+                    labelavgCentrality.setText("Priemerná hodnota: "+avgValue);
 
                     /*
                      for (int i = 0; i < series1.getData().size(); i++) {

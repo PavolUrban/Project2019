@@ -73,6 +73,7 @@ public class Distances {
     public static double countEuclideanDistance( ArrayList<Double> values1,  ArrayList<Double> values2)
     {
         double sum = 0.0;
+
         for (int x=0; x<values1.size(); x++)
         {
             
