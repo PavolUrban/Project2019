@@ -49,9 +49,10 @@ public class UserSettings {
     
     //max-similarities for LRNET
     public static List<Double> maxSimilarities = new ArrayList();
+    public static double tolerance = 0.0;
     
-    public static int minDegree = 1000;
-    public static int maxDegree = -1;
+    public static double minDegree = 1000;
+    public static double maxDegree = -1;
     
     
     public static double sampleSize = 0.15;

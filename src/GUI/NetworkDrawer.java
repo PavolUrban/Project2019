@@ -83,9 +83,8 @@ public class NetworkDrawer {
             Vertex v = p.getFirst();
             Vertex v2 = p.getSecond();
 //            System.out.println(UserSettings.maxSliderValue + " vs "+ e.getWeight()/UserSettings.maxSliderValue);
-            double normalizedEdgeWeight = 1 - ( e.getWeight()/UserSettings.maxSliderValue) + 0.2; // + 0,2 to visible maximally weighted edge which would have value 0
            
-            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), Math.pow(normalizedEdgeWeight, 3), Color.BLACK);
+            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.3, Color.BLACK);
         }             
          
         colorizePointsProperly(gc, network);
@@ -167,10 +166,8 @@ public class NetworkDrawer {
                 }
             }
             
-            
-            double normalizedEdgeWeight = 1 - ( e.getWeight()/UserSettings.maxSliderValue) + 0.2; // + 0,2 to visible maximally weighted edge which would have value 0
-    
-            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), Math.pow(normalizedEdgeWeight, 3), Color.BLACK);
+          
+            drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.3, Color.BLACK);
         }             
                    
         colorizePointsProperly(gc, network);

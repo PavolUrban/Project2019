@@ -30,7 +30,7 @@ public class Degreee {
         scores = new ArrayList<>();
         for(Vertex v : network.getVertices()){
             
-            int degree = network.getOutEdges(v).size() / 2;
+            double degree = network.getOutEdges(v).size();
             
             if(degree < UserSettings.minDegree)
                 UserSettings.minDegree = degree;
@@ -40,7 +40,9 @@ public class Degreee {
             
             
             v.setDegree(degree);
-            scores.add(new Pair(v, (double)degree));
+            
+            System.out.println("Ratam degree "+ degree);
+            scores.add(new Pair(v, degree));
         }
     }
      

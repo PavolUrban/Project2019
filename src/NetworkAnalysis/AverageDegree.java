@@ -32,7 +32,10 @@ public class AverageDegree {
         int minDegree = 500;
         for(Vertex v : network.getVertices()){
           
-            upside += (double)network.getOutEdges(v).size() / 2.0;
+            System.out.println("incident "+ network.getIncidentEdges(v).size());
+             System.out.println("out "+ network.getOutEdges(v).size());
+             System.out.println("---------------------------------------");
+            upside += (double)network.getOutEdges(v).size();
             if(network.getOutEdges(v).size()< minDegree)
             {
                 minDegree = network.getOutEdges(v).size();

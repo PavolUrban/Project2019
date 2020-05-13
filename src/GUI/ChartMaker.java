@@ -279,25 +279,18 @@ recount.setVisible(false);
                 double numberOfGroups = max / range;
                 int numberOfGroupsInteger = (int) numberOfGroups + 1; //to get nearest upper integer value
                 numberOfGroupss = numberOfGroupsInteger;
-                System.out.println("Hodnota maximalnej centrality je " + max + " a range je " + range);
-                System.out.println("Cislo je desatinne a pocet skupin je" + numberOfGroups + " najblizsie vyssie cislo je " + numberOfGroupsInteger + " maximalna centralita ma hodnotu" + max);
                 groups = new int[numberOfGroupsInteger];
                 borders = new double[numberOfGroupsInteger];
                // arrayToPrint = new int[numberOfGroupsInteger];
-                System.out.println("Pocet skupin je " + groups.length);
                 resetGroupsCountersForClossenes(range);
             } else {
                 double numberOfGroups = max / range;
                 int numberOfGroupsInteger = (int) numberOfGroups + 1; //to get nearest upper integer value
                 numberOfGroupss = numberOfGroupsInteger;
-                System.out.println("Hodnota maximalnej centrality je " + max + " a range je " + range);
-                System.out.println("Cislo je desatinne a pocet skupin je" + numberOfGroups + " najblizsie vyssie cislo je " + numberOfGroupsInteger + " maximalna centralita ma hodnotu" + max);
                 groups = new int[numberOfGroupsInteger];
                 borders = new double[numberOfGroupsInteger];
                // arrayToPrint = new int[numberOfGroupsInteger];
-                System.out.println("Pocet skupin je " + groups.length);
                 resetGroupsCountersForClossenes(range);
-                System.out.println("decimal value is not there");
             }
 
             for (Pair<Vertex, Double> m : data) {
@@ -306,7 +299,6 @@ recount.setVisible(false);
                     if (m.getValue() < borders[i]) {
 
                         groups[i]++;
-                        System.out.println("Hodnota centrality je " + m.getValue() + " a to je menej ako " + borders[i] + " pricitavam k skupine " + i + " ta ma hodnotu" + groups[i]);
                         break;
                     }
                 }
@@ -327,7 +319,7 @@ recount.setVisible(false);
                 //series1.setName("Group " + lowBorder + "-" + borders[i]); //opravit ..ked nevykreslujem vsetko tak je to napicu
                 series1.getData().add(new XYChart.Data(lowBorder + "-" + upBorder, groups[i]));
                 //series2.getData().add(new XYChart.Data(lowBorder + "-" + upBorder, groups[i] + 3));
-                System.out.println("Pridavam tuto hodnotu" + groups[i]);
+             
                 lowBorder = lowBorder + range;
                 upBorder = lowBorder + range;
             }
@@ -431,25 +423,18 @@ saveChartData.setVisible(true);
                 double numberOfGroups = max / range;
                 int numberOfGroupsInteger = (int) numberOfGroups + 1; //to get nearest upper integer value
                 numberOfGroupss = numberOfGroupsInteger;
-                System.out.println("Hodnota maximalnej centrality je " + max + " a range je " + range);
-                System.out.println("Cislo je desatinne a pocet skupin je" + numberOfGroups + " najblizsie vyssie cislo je " + numberOfGroupsInteger + " maximalna centralita ma hodnotu" + max);
                 groups = new int[numberOfGroupsInteger];
                 borders = new double[numberOfGroupsInteger];
                // arrayToPrint = new int[numberOfGroupsInteger];
-                System.out.println("Pocet skupin je " + groups.length);
                 resetGroupsCounters(range);
             } else {
                 double numberOfGroups = max / range;
                 int numberOfGroupsInteger = (int) numberOfGroups + 1; //to get nearest upper integer value
                 numberOfGroupss = numberOfGroupsInteger;
-                System.out.println("Hodnota maximalnej centrality je " + max + " a range je " + range);
-                System.out.println("Cislo je desatinne a pocet skupin je" + numberOfGroups + " najblizsie vyssie cislo je " + numberOfGroupsInteger + " maximalna centralita ma hodnotu" + max);
                 groups = new int[numberOfGroupsInteger];
                 borders = new double[numberOfGroupsInteger];
               //  arrayToPrint = new int[numberOfGroupsInteger];
-                System.out.println("Pocet skupin je " + groups.length);
                 resetGroupsCounters(range);
-                System.out.println("decimal value is not there");
             }
 
             for (Pair<Vertex, Double> m : data) {
@@ -458,7 +443,6 @@ saveChartData.setVisible(true);
                     if (m.getValue() < borders[i]) {
 
                         groups[i]++;
-                        System.out.println("Hodnota centrality je " + m.getValue() + " a to je menej ako " + borders[i] + " pricitavam k skupine " + i + " ta ma hodnotu" + groups[i]);
                         break;
                     }
                 }
@@ -480,7 +464,6 @@ saveChartData.setVisible(true);
                 //series1.setName("Group " + lowBorder + "-" + borders[i]); //opravit ..ked nevykreslujem vsetko tak je to napicu
                 series1.getData().add(new XYChart.Data(lowBorder + "-" + (upBorder - 1), groups[i]));
                 // series2.getData().add(new XYChart.Data(lowBorder + "-" + (upBorder - 1), groups[i] + 3));
-                System.out.println("Pridavam tuto hodnotu" + groups[i]);
                 lowBorder = lowBorder + rangeINT;
                 upBorder = lowBorder + rangeINT;
             }
@@ -568,7 +551,6 @@ recount.setVisible(true);
         for (int i = 0; i < groups.length; i++) {
             groups[i] = 0;
             borders[i] = range * times;
-            System.out.println("range: " + range + " borders: " + borders[i]);
             times++;
         }
     }
@@ -578,25 +560,18 @@ recount.setVisible(true);
             double numberOfGroups = max / range;
             int numberOfGroupsInteger = (int) numberOfGroups + 1; //to get nearest upper integer value
             numberOfGroupss = numberOfGroupsInteger;
-            System.out.println("Hodnota maximalnej centrality je " + max + " a range je " + range);
-            System.out.println("Cislo je desatinne a pocet skupin je" + numberOfGroups + " najblizsie vyssie cislo je " + numberOfGroupsInteger + " maximalna centralita ma hodnotu" + max);
             groups = new int[numberOfGroupsInteger];
             //arrayToPrint = new int[numberOfGroupsInteger];
             borders = new double[numberOfGroupsInteger];
-            System.out.println("Pocet skupin je " + groups.length);
             resetGroupsCounters(range);
         } else {
             double numberOfGroups = max / range;
             int numberOfGroupsInteger = (int) numberOfGroups + 1; //to get nearest upper integer value
             numberOfGroupss = numberOfGroupsInteger;
-            System.out.println("Hodnota maximalnej centrality je " + max + " a range je " + range);
-            System.out.println("Cislo je desatinne a pocet skupin je" + numberOfGroups + " najblizsie vyssie cislo je " + numberOfGroupsInteger + " maximalna centralita ma hodnotu" + max);
             groups = new int[numberOfGroupsInteger];
             borders = new double[numberOfGroupsInteger];
             //arrayToPrint = new int[numberOfGroupsInteger];
-            System.out.println("Pocet skupin je " + groups.length);
             resetGroupsCounters(range);
-            System.out.println("decimal value is not there");
         }
 
         for (Pair<Vertex, Double> m : data) {
@@ -604,7 +579,6 @@ recount.setVisible(true);
                 if (m.getValue() < borders[i]) {
 
                     groups[i]++;
-                    System.out.println("Hodnota centrality je " + m.getValue() + " a to je menej ako " + borders[i] + " pricitavam k skupine " + i + " ta ma hodnotu" + groups[i]);
                     break;
                 }
             }
@@ -625,7 +599,6 @@ recount.setVisible(true);
             //series1.setName("Group " + lowBorder + "-" + borders[i]); //opravit ..ked nevykreslujem vsetko tak je to napicu
             series1.getData().add(new XYChart.Data(lowBorder + "-" + (upBorder - 1), groups[i]));
             //series2.getData().add(new XYChart.Data(lowBorder + "-" + (upBorder - 1), groups[i] + 3));
-            System.out.println("Pridavam tuto hodnotu" + groups[i]);
             lowBorder = lowBorder + rangeINT;
             upBorder = lowBorder + rangeINT;
         }
@@ -640,25 +613,18 @@ recount.setVisible(true);
             double numberOfGroups = max / range;
             int numberOfGroupsInteger = (int) numberOfGroups + 1; //to get nearest upper integer value
             numberOfGroupss = numberOfGroupsInteger;
-            System.out.println("Hodnota maximalnej centrality je " + max + " a range je " + range);
-            System.out.println("Cislo je desatinne a pocet skupin je" + numberOfGroups + " najblizsie vyssie cislo je " + numberOfGroupsInteger + " maximalna centralita ma hodnotu" + max);
             groups = new int[numberOfGroupsInteger];
             borders = new double[numberOfGroupsInteger];
             arrayToPrint = new int[numberOfGroupsInteger];
-            System.out.println("Pocet skupin je " + groups.length);
             resetGroupsCountersForClossenes(range);
         } else {
             double numberOfGroups = max / range;
             int numberOfGroupsInteger = (int) numberOfGroups + 1; //to get nearest upper integer value
             numberOfGroupss = numberOfGroupsInteger;
-            System.out.println("Hodnota maximalnej centrality je " + max + " a range je " + range);
-            System.out.println("Cislo je desatinne a pocet skupin je" + numberOfGroups + " najblizsie vyssie cislo je " + numberOfGroupsInteger + " maximalna centralita ma hodnotu" + max);
             groups = new int[numberOfGroupsInteger];
             borders = new double[numberOfGroupsInteger];
             arrayToPrint = new int[numberOfGroupsInteger];
-            System.out.println("Pocet skupin je " + groups.length);
             resetGroupsCountersForClossenes(range);
-            System.out.println("decimal value is not there");
         }
 
         for (Pair<Vertex, Double> m : data) {
@@ -667,7 +633,6 @@ recount.setVisible(true);
                 if (m.getValue() < borders[i]) {
 
                     groups[i]++;
-                    System.out.println("Hodnota centrality je " + m.getValue() + " a to je menej ako " + borders[i] + " pricitavam k skupine " + i + " ta ma hodnotu" + groups[i]);
                     break;
                 }
             }
@@ -688,7 +653,6 @@ recount.setVisible(true);
             //series1.setName("Group " + lowBorder + "-" + borders[i]); //opravit ..ked nevykreslujem vsetko tak je to napicu
             series1.getData().add(new XYChart.Data(lowBorder + "-" + upBorder, groups[i]));
             //series2.getData().add(new XYChart.Data(lowBorder + "-" + upBorder, groups[i] + 3));
-            System.out.println("Pridavam tuto hodnotu" + groups[i]);
             lowBorder = lowBorder + range;
             upBorder = lowBorder + range;
         }

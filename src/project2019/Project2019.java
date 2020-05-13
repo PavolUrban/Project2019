@@ -171,6 +171,10 @@ public class Project2019 extends Application {
     Label labelTopEdges = new Label("Percento najvýznamnejších hrán: ");
     
     
+    
+    TextField textFieldLRNetTolerance = new TextField("");
+    Label labelLRNet = new Label("LRNet tolerancia: ");
+    
     //KNN related
     TextField textFieldKNN = new TextField("2");
     Label labelKNNRelated = new Label("Hodnota k: ");
@@ -1116,6 +1120,7 @@ public class Project2019 extends Application {
             {
                 slider.setMin(0.0);
                 slider.setMax(1.0);
+                slider.setValue(0.25);
             }
 
             //TODO disable LRNET knn props and so ons
@@ -1131,7 +1136,7 @@ public class Project2019 extends Application {
             Number oldVal, Number newVal) {
 
        
-            
+            choicesMetrics.setDisable(false);
             //Epsilon neighbourhood
             if((int)newVal == 0)
             {
@@ -1139,13 +1144,12 @@ public class Project2019 extends Application {
                 labelKNNRelated.setDisable(true);
                 labelTopEdges.setDisable(true);
                 textFieldTopEdges.setDisable(true);
+                textFieldLRNetTolerance.setDisable(true);
+                labelLRNet.setDisable(true);
               
                 labelForSlider.setDisable(false);
                 slider.setDisable(false);
                 sliderValue.setDisable(false);
-
-                
-                setSliderDefault(slider, checkboxNormalization.isSelected());
             }
             
             //KNN
@@ -1156,6 +1160,8 @@ public class Project2019 extends Application {
                 labelForSlider.setDisable(true);
                 slider.setDisable(true);
                 sliderValue.setDisable(true);
+                textFieldLRNetTolerance.setDisable(true);
+                labelLRNet.setDisable(true);
                 
                 textFieldKNN.setDisable(false);
                 labelKNNRelated.setDisable(false);
@@ -1169,6 +1175,8 @@ public class Project2019 extends Application {
                 labelForSlider.setDisable(true);
                 slider.setDisable(true);
                 sliderValue.setDisable(true);
+                textFieldLRNetTolerance.setDisable(true);
+                labelLRNet.setDisable(true);
            
                 labelTopEdges.setDisable(false);
                 textFieldTopEdges.setDisable(false);
@@ -1179,6 +1187,8 @@ public class Project2019 extends Application {
             {
                 labelTopEdges.setDisable(true);
                 textFieldTopEdges.setDisable(true);
+                textFieldLRNetTolerance.setDisable(true);
+                labelLRNet.setDisable(true);
                 
                 textFieldKNN.setDisable(false);
                 labelKNNRelated.setDisable(false);
@@ -1186,8 +1196,23 @@ public class Project2019 extends Application {
                 slider.setDisable(false);
                 sliderValue.setDisable(false);
             }
-
-            //TODO disable LRNET knn props and so ons
+            
+            //LRNet
+            else if((int)newVal == 4)
+            {
+                labelTopEdges.setDisable(true);
+                textFieldTopEdges.setDisable(true);
+                labelForSlider.setDisable(true);
+                slider.setDisable(true);
+                sliderValue.setDisable(true);
+                textFieldKNN.setDisable(true);
+                labelKNNRelated.setDisable(true);
+                
+                choicesMetrics.setDisable(true);
+                textFieldLRNetTolerance.setDisable(false);
+                labelLRNet.setDisable(false);
+            }
+            
         }
     });
        
@@ -1308,22 +1333,20 @@ public class Project2019 extends Application {
             
             else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 3 && textFieldKNN.getText().equalsIgnoreCase(""))
             {
-                
+                AlertsWindows.displayAlert("Prosím, nastavte hodnotu parametru k.");
+            }
+            
+            else if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 4 && textFieldLRNetTolerance.getText().equalsIgnoreCase(""))
+            {
+                AlertsWindows.displayAlert("Nastavte prosím parameter LRNet tolerancia.");
             }
             
             else
             {
                 
                 //TODO toto upravit na nieco rozumnejsie
-                
-                
                 displayLoading(null);
-                
-                
-               
-              
-                
-                
+           
                 //todo add button to table or something like that to decide what should be done with non-numeric property
                 if(UserSettings.hasNonNumericProperty)
                     AlertsWindows.displayNetworkHasNonNumericProperties(UserSettings.nonNumericPropertiesNames);
@@ -1362,6 +1385,16 @@ public class Project2019 extends Application {
         textFieldKNN.setMaxWidth(50);
         textFieldKNN.setTextFormatter(textFormatter);
         
+        textFieldLRNetTolerance.setDisable(true);
+        labelLRNet.setDisable(true);
+        
+        Pattern pattern2 = Pattern.compile("\\d*|\\d+\\.\\d*");
+        TextFormatter formatter = new TextFormatter((UnaryOperator<TextFormatter.Change>) change -> {
+            return pattern2.matcher(change.getControlNewText()).matches() ? change : null;
+        });
+
+        textFieldLRNetTolerance.setTextFormatter(formatter);
+
        
         
         final HBox HBOXNetworkCreationParams = new HBox();
@@ -1375,7 +1408,7 @@ public class Project2019 extends Application {
         textFieldTopEdges.setMaxWidth(50);
         textFieldTopEdges.setTextFormatter(textFormatter2);
         
-        HBOXNetworkCreationParams.getChildren().addAll(labelKNNRelated, textFieldKNN, labelTopEdges , textFieldTopEdges);
+        HBOXNetworkCreationParams.getChildren().addAll(labelKNNRelated, textFieldKNN, labelTopEdges , textFieldTopEdges, labelLRNet, textFieldLRNetTolerance);
         
         
         final HBox HBOXNetworkParamsColorize = new HBox();
@@ -1429,6 +1462,12 @@ public class Project2019 extends Application {
     }
     
     
+    
+    public void setLRNetDistanceProperly()
+    {
+        System.out.println("Toto je hodnota LRnet tolerancie " + textFieldLRNetTolerance.getText());
+        UserSettings.tolerance = Double.parseDouble(textFieldLRNetTolerance.getText());
+    }
     
         public void displayLoading(File f) {
         final ProgressIndicator pin = new ProgressIndicator();
@@ -1523,6 +1562,11 @@ public class Project2019 extends Application {
         try {
             
             System.out.println("Starting creation");
+            
+            //LRNet
+            if(choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex() == 4)
+                setLRNetDistanceProperly();
+            
             network = DataPreparationToNetwork.readSpecificLines(network,checkboxNormalization.isSelected(),choicesNetworkMethodCreation.getSelectionModel().getSelectedIndex(),selectedHeaders, filterByYear,year, filterBySex,sex, filterByGrade,grade, filterByRegion,region, filterBySchool, school, slider.getValue(),choicesMetrics.getSelectionModel().getSelectedItem().toString(), textFieldKNN.getText(), textFieldTopEdges.getText());
   
 

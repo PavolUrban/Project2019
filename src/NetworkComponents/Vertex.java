@@ -50,7 +50,7 @@ public class Vertex {
     
     private boolean isInSample = false;
 
-    private int degree;
+    private double degree;
     
     public Vertex(int id) {
         this(id, "");
@@ -77,7 +77,7 @@ public class Vertex {
         return id;
     }
     
-    public int getDegree()
+    public double getDegree()
     {
         return this.degree;
     }
@@ -167,7 +167,7 @@ public class Vertex {
     }
 
     
-    public void setDegree(int degree)
+    public void setDegree(double degree)
     {
         this.degree = degree;
     }

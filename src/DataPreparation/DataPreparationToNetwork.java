@@ -89,7 +89,8 @@ public class DataPreparationToNetwork {
             else if(methodOfNetworkCreation == 4)
             {
                 LRNet lrnet = new LRNet();
-                network = lrnet.createLRNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized));
+                double tolerance = UserSettings.tolerance;
+                network = lrnet.createLRNetwork(getOnlyRelevantColumns(headers, lines, distanceMethod, normalized), tolerance);
             }
             
         }

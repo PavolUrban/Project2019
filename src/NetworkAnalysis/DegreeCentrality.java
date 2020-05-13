@@ -32,7 +32,6 @@ public class DegreeCentrality {
             double numberOfConnectedVertices = (double)network.getOutEdges(v).size();
             double result = numberOfConnectedVertices/numberOfNodesInNetwork;
             
-            System.out.println("pocet pripojeni" +numberOfConnectedVertices+" pocet uzlov v sieti " +numberOfNodesInNetwork+", vysledok je "+result);
             scores.add(new Pair(v, result));
         }
     }

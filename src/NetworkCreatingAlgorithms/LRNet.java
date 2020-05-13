@@ -29,8 +29,7 @@ import java.util.stream.DoubleStream;
  */
 public class LRNet 
 {
-    static double tolerance = 1e-6;
-    
+ 
     //Comparator to sort Map by valu
     public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
         List<Entry<K, V>> list = new ArrayList<>(map.entrySet());
@@ -47,7 +46,7 @@ public class LRNet
     }   
     
    
-    private int getLocalDegree(List<Double> objectSimilarities, int currentVertexIndex, Vertex v, List<Vertex> vertices)
+    private int getLocalDegree(List<Double> objectSimilarities, int currentVertexIndex, Vertex v, List<Vertex> vertices, double tolerance)
     {
         int numberOfNeighbours = 0;
  
@@ -66,30 +65,34 @@ public class LRNet
         
         Map<Integer, Double> allNeighbours = sortByValue(neighbours);
         v.setLRNeighbours(allNeighbours);
+
+        System.out.println("Toto je dlzka kolekcie "+relevantSimilarities.size());
         
-        UserSettings.maxSimilarities.add(Collections.max(relevantSimilarities));
+        if(relevantSimilarities.size() < 1)
+            UserSettings.maxSimilarities.add(null);
+        else
+            UserSettings.maxSimilarities.add(Collections.max(relevantSimilarities));
         
         return numberOfNeighbours;
     }
     
     
-    private void assignLocalDegree(List<Vertex> vertices, double[][] similarityMatrix)
+    private void assignLocalDegree(List<Vertex> vertices, double[][] similarityMatrix, double tolerance)
     {
         int vertexIndex=0;
         
         for(Vertex v : vertices)
         {
-            System.out.println("local degree "+vertexIndex);
             List<Double> similarityValues = DoubleStream.of(similarityMatrix[vertexIndex]).boxed().collect(Collectors.toList());
             v.setAllSimilarities(similarityValues);
-            v.setLocalDegree(getLocalDegree(similarityValues, vertexIndex, v, vertices));
+            v.setLocalDegree(getLocalDegree(similarityValues, vertexIndex, v, vertices, tolerance));
             vertexIndex++;
         }
     
     }
     
     
-    private static boolean objectsAreClose(double actual, double expected)
+    private static boolean objectsAreClose(double actual, double expected, double tolerance)
     {
         double diff = Math.abs(actual - expected);
         boolean areClose = false;
@@ -104,15 +107,33 @@ public class LRNet
     
     
    
-    private void setRepresentativeness(List<Vertex> vertices, int minNeighbours)
+    
+    private void assignLocalSignificance(List<Vertex>vertices, int minNeighbours, Graph<Vertex, Edge> graph, double tolerance)
     {
-        for(Vertex v : vertices)
-        {   
-             //x-representativeness base
-            double b = 0;
-           
-            //local representativeness
-            double lr = 0.0;
+        
+        for(int i=0; i < vertices.size(); i++)
+        {
+            Vertex v = vertices.get(i);
+            
+            //local significance part
+            List<Double> allVertexSimilarities = v.getAllSimilarities();
+            int localSignigicance = 0;
+            for(int j=0; j< UserSettings.maxSimilarities.size(); j++)
+            {              
+                if(UserSettings.maxSimilarities.get(j) != null)
+                {
+                    if(objectsAreClose(UserSettings.maxSimilarities.get(j), allVertexSimilarities.get(j), tolerance) && (i!=j))
+                        localSignigicance++;
+                }
+                
+            }
+
+            v.setLocalSignificance(localSignigicance);
+            
+            
+            //caluculating representativeness from here
+            double b = 0; //x-representativeness base
+            double lr = 0.0;//local representativeness
             
             if(v.getLocalSignificance() > 0)
             {
@@ -131,13 +152,12 @@ public class LRNet
     
             Map<Integer, Double> finalNeighbours = new HashMap();
             int maxNeighbours = 0;
-            double last=-75;// TODO doriesit last
+
             for (Map.Entry<Integer, Double> neighbour : v.getLRNeighbours().entrySet())
             {
                 //if(objectsAreClose(neighbour.getValue(), kValue))
                 if(maxNeighbours < kValue)
                 {
-                    last = neighbour.getValue();
                     finalNeighbours.put(neighbour.getKey(), neighbour.getValue());
                 }
                 else
@@ -147,25 +167,15 @@ public class LRNet
             
             
             v.setLRNeighbours(finalNeighbours);
-        }
-        
-    }
-    
-    
-    private void assignLocalSignificance(List<Vertex>vertices)
-    {
-        
-        for(int i=0; i < vertices.size(); i++)
-        {
-            List<Double> allVertexSimilarities = vertices.get(i).getAllSimilarities();
-            int localSignigicance = 0;
-            for(int j=0; j< UserSettings.maxSimilarities.size(); j++)
-            {              
-                if(objectsAreClose(UserSettings.maxSimilarities.get(j), allVertexSimilarities.get(j)) && (i!=j))
-                    localSignigicance++;
+      
+            int edgeId = 0;
+            for (Map.Entry<Integer, Double> neighbour : v.getLRNeighbours().entrySet())
+            {
+                Edge e = new Edge(edgeId, neighbour.getValue());           
+                graph.addEdge(e, v, vertices.get(neighbour.getKey()));
+                edgeId++;
             }
             
-            vertices.get(i).setLocalSignificance(localSignigicance);
         }
     }
     
@@ -178,7 +188,7 @@ public class LRNet
         int indexV1 = 0;
         for(Vertex v1 : vertices)
         {
-            System.out.println("counting "+indexV1);
+         
             int indexV2 = 0;
             for(Vertex v2 : vertices)
             {
@@ -194,15 +204,17 @@ public class LRNet
     
     
     //add parameter min neighbours
-    public Graph<Vertex, Edge> createLRNetwork(List<ChosenRecords> lines) throws FileNotFoundException
+    public Graph<Vertex, Edge> createLRNetwork(List<ChosenRecords> lines, double tolerance) throws FileNotFoundException
     {         
         //to avoid out of bounds exception when network is created repeatedly by LRNet method
         UserSettings.maxSimilarities.clear();
         
         System.out.println("Counting LRNET");
+        
         List<Vertex> vertices = new ArrayList<>(); 
         SparseGraph <Vertex, Edge> graph = new SparseGraph<>();
- ZonedDateTime startTime = ZonedDateTime.now();
+        ZonedDateTime startTime = ZonedDateTime.now();
+        
         //add vertices and get values from proper columns (attributes)
         int index = 0;
         for(ChosenRecords cr : lines)
@@ -216,39 +228,22 @@ public class LRNet
             graph.addVertex(v);
             index++;
         }
+        
         System.out.println("Counting similarityMatrix");
         double[][] similarityMatrix = countSimilarityMatrix(vertices);
         System.out.println("**Asinging local degree");
         
-        assignLocalDegree(vertices, similarityMatrix);
+        assignLocalDegree(vertices, similarityMatrix, tolerance);
         
-        System.out.println("Counting similarityMatrix");
-        assignLocalSignificance(vertices);  
-        setRepresentativeness(vertices, 1);
+        System.out.println("now local significance with representativeness  + add edges");
+        assignLocalSignificance(vertices, 1, graph, tolerance); 
+       
         
-        int edgeId = 0;
+      
         
-        int idToDel =0 ;
-        for(Vertex v :vertices)
-        {
-            System.out.println("Pracujem na "+idToDel);
-            idToDel++;
-            for (Map.Entry<Integer, Double> neighbour : v.getLRNeighbours().entrySet())
-            {
-                Edge e = new Edge(edgeId, neighbour.getValue());           
-                graph.addEdge(e, v, vertices.get(neighbour.getKey()));
-                edgeId++;
-            }
-        }
-        
-        
-                     ZonedDateTime endTime = ZonedDateTime.now();
-
-Duration duration = Duration.between(startTime, endTime);
-        
-        System.out.println("pocet uzlov "+ graph.getVertexCount());
-        System.out.println("pocet hran "+ graph.getEdgeCount());
-        System.out.println("cas "+ duration.toMillis()+" ms");
+        ZonedDateTime endTime = ZonedDateTime.now();
+        Duration duration = Duration.between(startTime, endTime);
+        System.out.println("cas "+ duration.toMillis()/1000+" s");
        
         
         return graph;
@@ -264,13 +259,8 @@ Duration duration = Duration.between(startTime, endTime);
             
             sum += Math.pow(values1.get(x)-values2.get(x),2);
         }
-        
-        //lambda = 1/2o^2 -- TODO o should be dynamically set now it is 1 by default
-       //double finalResult = Math.exp(- (sum / lambda));
-       //double lambda = 1/(Math.pow(2*1, 2));
-        
-       //1- .. it is used to transform similarity to distance 
-       double finalResult = Math.exp(-1 * sum); //lambda's behavior is like it is set to 1
+
+       double finalResult = Math.exp(-1 * sum);     
        
         return finalResult;
     }
