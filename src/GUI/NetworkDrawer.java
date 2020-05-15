@@ -137,39 +137,31 @@ public class NetworkDrawer {
 
         Collection<Vertex> oldVertices = UserSettings.savedNetwork.getVertices();
         
-        //System.out.println("V starej sieti bolo tolkoto hran "+UserSettings.savedNetwork.getEdgeCount()+" vs v novej "+network.getEdgeCount());
+        
+        Collection<Vertex> newVertices = network.getVertices();
+        
+        for(Vertex vOld : oldVertices)
+        {
+            for(Vertex vNew : newVertices)
+            {
+                if(vOld.getId() == vNew.getId())
+                {
+                    vNew.setPositionX(vOld.getPositionX());
+                    vNew.setPositionY(vOld.getPositionY());
+                    break;
+                }
+            }
+        }
+        
         for (Edge e : network.getEdges()) 
         {
             Pair<Vertex> p = network.getEndpoints(e);
             Vertex v = p.getFirst();
             Vertex v2 = p.getSecond();
-            
-            //TODO - prechadzat rozumnejsie
-            for(Vertex old : oldVertices)
-            {
-                if(old.getId() == v.getId())
-                {
-                   // System.out.println("nasiel som uzol "+v.getId()+ "v starej sieti menim poziciu "+v.getPositionX()+" na poziciu "+old.getPositionX());
-                    v.setPositionX(old.getPositionX());
-                    v.setPositionY(old.getPositionY());
-                    break;
-                }
-            }
-            
-            for(Vertex old : oldVertices)
-            {
-                if(old.getId() == v2.getId())
-                {
-                    v2.setPositionX(old.getPositionX());
-                    v2.setPositionY(old.getPositionY());
-                    break;
-                }
-            }
-            
-          
             drawEdge(gc, v.getPositionX(), v.getPositionY(), v2.getPositionX(), v2.getPositionY(), 0.3, Color.BLACK);
-        }             
-                   
+        }
+    
+        //this creates vertices and add colors
         colorizePointsProperly(gc, network);
     }
     

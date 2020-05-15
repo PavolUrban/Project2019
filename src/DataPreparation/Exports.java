@@ -83,7 +83,7 @@ public class Exports
             FileChooser fileChooser = new FileChooser();
 
             //Set extension filter
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV", ".csv");;
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("GDF", ".gdf");;
             fileChooser.getExtensionFilters().add(extFilter);
 
             //Show save file dialog

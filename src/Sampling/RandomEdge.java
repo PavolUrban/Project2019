@@ -40,6 +40,7 @@ public class RandomEdge {
         ArrayList<Edge> edges = new ArrayList<>(allEdges);
         
         int numberOfVertices = network.getVertexCount();
+        System.out.println("Tato siet ma teraz tolkoto uzlov "+numberOfVertices);
         double numberOfVerticesInSample = numberOfVertices * percentage;
         int roundedNumber = (int) numberOfVerticesInSample;
         

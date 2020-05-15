@@ -172,7 +172,7 @@ public class Project2019 extends Application {
     
     
     
-    TextField textFieldLRNetTolerance = new TextField("");
+    TextField textFieldLRNetTolerance = new TextField("0.0001");
     Label labelLRNet = new Label("LRNet tolerancia: ");
     
     //KNN related
@@ -287,6 +287,7 @@ public class Project2019 extends Application {
                 setBasicNetworkCharacteristics();
                 runLayoutOrDisplayWarning(currentLayout);
             
+                newWindow.close();
             }
         });          
         

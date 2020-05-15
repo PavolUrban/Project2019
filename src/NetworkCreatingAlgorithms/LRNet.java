@@ -66,8 +66,7 @@ public class LRNet
         Map<Integer, Double> allNeighbours = sortByValue(neighbours);
         v.setLRNeighbours(allNeighbours);
 
-        System.out.println("Toto je dlzka kolekcie "+relevantSimilarities.size());
-        
+     
         if(relevantSimilarities.size() < 1)
             UserSettings.maxSimilarities.add(null);
         else

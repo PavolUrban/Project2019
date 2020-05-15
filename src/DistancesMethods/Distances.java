@@ -63,7 +63,7 @@ public class Distances {
        //double lambda = 1/(Math.pow(2*1, 2));
         
        //1- .. it is used to transform similarity to distance 
-       double finalResult = 1 - Math.exp(-1 * (sum / 2)); //lambda's behavior is like it is set to 1
+       double finalResult = 1- Math.exp(-1 * (sum)); //lambda's behavior is like it is set to 1
        
        
         return finalResult;
@@ -132,7 +132,7 @@ public class Distances {
         double finalResult = (sumUpside)/(Math.sqrt(sumDownsideValues1*sumDownsideValues2));
   
         //to convert correlation into distance
-        double convertedFinalResult = 1 - Math.abs(finalResult);
+        double convertedFinalResult = 1- Math.abs(finalResult);
       
         System.out.println(convertedFinalResult);
         return convertedFinalResult;

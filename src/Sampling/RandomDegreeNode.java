@@ -52,10 +52,7 @@ public class RandomDegreeNode {
         
         final Set<Integer> pickedRandomNumbers = new HashSet<>();
 
-        
-        System.out.println("Max deg "+ UserSettings.maxDegree);
-        System.out.println("Min deg "+UserSettings.minDegree);
-        
+       
         Collection<Vertex> allVertices = network.getVertices();
         ArrayList<Vertex> vertices = new ArrayList<>(allVertices);
         
@@ -72,7 +69,7 @@ public class RandomDegreeNode {
             double normalizedDegree = ( (double) network.getOutEdges(v).size() - (double) UserSettings.minDegree) / ( (double)UserSettings.maxDegree - (double)UserSettings.minDegree);
             
             double randomValue = 0 + (1 - 0) * r.nextDouble();
-            System.out.println("Porovnavam "+normalizedDegree+" vs "+randomValue+ " povodne bol degree "+v.getDegree());
+
             if(normalizedDegree > randomValue)
             {
                 pickedRandomNumbers.add(randomVertexId);
